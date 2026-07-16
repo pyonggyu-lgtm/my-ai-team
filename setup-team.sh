@@ -23,14 +23,14 @@ wait_for_pane() {
 
 # ── 유틸: Claude 실행 + 다이얼로그 자동 처리 ────────────────
 start_claude_in_pane() {
-  local pane="$1" model="${2:-claude-sonnet-4-6}" extra_flags="$3"
+  local pane="$1" model="${2:-claude-sonnet-4-6}"
   local claude_bin; claude_bin="$(command -v claude)"
 
   tmux send-keys -t "$pane" C-c 2>/dev/null; sleep 0.3
   tmux send-keys -t "$pane" C-u 2>/dev/null; sleep 0.2
 
   tmux send-keys -t "$pane" \
-    "cd /workspace && unset CLAUDECODE && $claude_bin --model $model --dangerously-skip-permissions $extra_flags" Enter
+    "cd /workspace && unset CLAUDECODE && $claude_bin --model $model --dangerously-skip-permissions" Enter
 
   # 다이얼로그 1: trust folder → Enter
   wait_for_pane "$pane" "trust this folder" 20 && {
@@ -123,9 +123,21 @@ MEMBER_MODELS=(
 
 for pane in 0 1 2 3 4 5; do
   echo -n "  Pane $pane (${MEMBER_NAMES[$pane]}): "
-  extra_flags=""
-  [ "$pane" -eq 0 ] && extra_flags="--remote-control '팀장 쭌'"
-  start_claude_in_pane "$SESSION:0.$pane" "${MEMBER_MODELS[$pane]}" "$extra_flags"
+
+  if [ "$pane" -eq 0 ]; then
+    # 팀장(쭌)만 서버 모드로 실행 — 모바일 등 외부에서 직접 접속 가능 (04-3장)
+    tmux send-keys -t "$SESSION:0.0" \
+      "cd /workspace && unset CLAUDECODE && claude remote-control --name '팀장-쭌' --spawn session --verbose" Enter
+    wait_for_pane "$SESSION:0.0" "trust this folder" 20 && {
+      tmux send-keys -t "$SESSION:0.0" Enter; sleep 1
+    }
+    wait_for_pane "$SESSION:0.0" "I accept" 20 && {
+      tmux send-keys -t "$SESSION:0.0" Down; sleep 0.5
+      tmux send-keys -t "$SESSION:0.0" Enter; sleep 1
+    }
+  else
+    start_claude_in_pane "$SESSION:0.$pane" "${MEMBER_MODELS[$pane]}"
+  fi
 
   tmux capture-pane -t "$SESSION:0.$pane" -p 2>/dev/null | grep -q ">" \
     && echo -e "${GREEN}✅ 준비 완료${NC}" \
