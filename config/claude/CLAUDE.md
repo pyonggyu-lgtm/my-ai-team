@@ -43,3 +43,11 @@
   claude mcp add --transport http github https://api.githubcopilot.com/mcp/ \
     --header "Authorization: Bearer YOUR_GITHUB_PAT"
   ```
+
+---
+
+## 컨텍스트 관리 (70% 규칙)
+
+- 컨텍스트 사용량이 70%를 넘으면 `/context-save` → `/clear` → `/context-restore` 순으로 정리한다
+- 매일 작업 종료 시 당일 진행 상황을 `memory/30_Daily/YYYY-MM-DD.md`에 기록한다 (완료한 것 / 미완료 / 주의사항)
+- 변하지 않는 규칙·역할은 CLAUDE.md에, 당일 진행 상황은 Daily 파일에, 세션 상세 상태는 `/context-save`에 나눠 관리한다
