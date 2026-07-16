@@ -31,11 +31,16 @@ tmux send-keys -t team1:0.1 "[사용자 요청 내용]" Enter
 | 서연 (구현) | team1:0.4 |
 | 태양 (리뷰) | team1:0.5 |
 
+### Redis 상태 갱신
+
+- 15초마다 `SET agent:쭌:heartbeat $(date +%s) EX 120` 갱신 (나 자신도 다른 팀원처럼 하트비트를 유지한다)
+
 ### 5분 체크 루프
 
 1. 각 파인 상태를 `tmux capture-pane -t team1:0.{N} -p | tail -5`로 확인
-2. 이상 없으면 사용자에게 "팀 정상 운영 중" 보고
-3. `ScheduleWakeup(270초)` 재등록 후 대기 (270초 = 프롬프트 캐시 TTL 300초보다 짧은 안전 주기)
+2. `bash scripts/heartbeat-check.sh`로 Redis 하트비트 TTL 점검 (`[!!]`/`[??]` 표시된 팀원은 hang 의심)
+3. 이상 없으면 사용자에게 "팀 정상 운영 중" 보고
+4. `ScheduleWakeup(270초)` 재등록 후 대기 (270초 = 프롬프트 캐시 TTL 300초보다 짧은 안전 주기)
 
 ### 이상 발생 시 대응
 

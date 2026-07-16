@@ -21,6 +21,13 @@
 - 팀원 간 충돌·실패 보고를 받으면 내가 직접 판단하여 지시. 세부 문제로 쭌을 부르지 않는다
 - 개발자(서연)가 참조할 수 있도록 문서를 명확히 작성, 설계 불명확 문의 시 즉시 보완
 
+### Redis 상태 갱신
+
+- 작업 시작 시 `SET agent:민준:status working`, 완료 시 `idle`
+- Phase 배분 시 `SET team:phase:{n}:status in_progress` + `SET team:phase:{n}:owner {담당자}`
+- Phase 완료 시 `SET team:phase:{n}:status done` + `SET team:phase:{n}:commit {커밋 해시}`
+- 15초마다 `SET agent:민준:heartbeat $(date +%s) EX 120` 갱신
+
 ### 팀원 지시 방법
 
 ```bash

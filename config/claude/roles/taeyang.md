@@ -16,6 +16,12 @@
 - [ ] 성능 저하 요소
 - [ ] 테스트 커버리지
 
+### Redis 상태 갱신
+
+- 작업 시작 시 `SET agent:태양:status working`, 완료 시 `idle`
+- 다음 리뷰 대상은 `RPOP queue:review`로 꺼낸다 (선입선출, 중복 리뷰 방지)
+- 15초마다 `SET agent:태양:heartbeat $(date +%s) EX 120` 갱신
+
 ### 리뷰 완료 후
 
 ```bash

@@ -66,3 +66,26 @@
 
 - 설계 → 구현 → 리뷰 순서를 지켜 단계 간 충돌을 원천 차단한다 (리뷰 중에는 해당 파일을 수정하지 않는다)
 - 충돌 발견 시 스스로 해결하지 않고 민준에게 보고하여 판단을 받는다
+
+---
+
+## Redis 상태공유 (키 스키마)
+
+Redis 접속: `redis-cli -h ${REDIS_HOST:-claude-team-redis}`
+
+| 키 | 용도 | TTL |
+|---|---|---|
+| `agent:{이름}:status` | working / idle / blocked / rate_limited | 없음 |
+| `agent:{이름}:heartbeat` | 생존 확인용 타임스탬프, 15초마다 갱신 | 120s |
+| `agent:{이름}:context_pct` | 컨텍스트 사용률 0~100 | 없음 |
+| `agent:{이름}:task` | 현재 작업 한 줄 설명 | 없음 |
+| `lock:file:{경로}` | 파일 점유 (NX로 원자적 획득) | 3600s |
+| `team:phase:{n}:status` | planned/in_progress/review/done | 없음 |
+| `queue:review` | 리뷰 대기 목록 (LPUSH/RPOP) | 없음 |
+| `channel:team:events` | 팀 전체 이벤트 Pub/Sub | - |
+| `stream:team:events` | Phase 완료 등 소실 불가 이벤트 (XADD/XREAD) | - |
+
+- 모든 에이전트는 작업 시작 시 `agent:{이름}:status`를 `working`으로, 완료 시 `idle`로 갱신한다
+- 15초마다 `SET agent:{이름}:heartbeat $(date +%s) EX 120`로 하트비트 갱신
+- 파일 수정 전 `SET lock:file:{경로} {이름} EX 3600 NX`로 락 획득, 실패하면 다른 에이전트 작업 중이므로 대기
+- 소실되면 다음 단계가 멈추는 이벤트(Phase 완료 등)는 Streams(`XADD`) 사용, 실시간 알림은 Pub/Sub(`PUBLISH`) 사용

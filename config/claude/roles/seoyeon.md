@@ -15,6 +15,13 @@
 - 구현 중 설계 불명확 시 민준에게 즉시 확인 요청
 - Phase 시작 시 반드시 실패 테스트부터 작성 (TDD, Red → Green → Refactor)
 
+### Redis 상태 갱신
+
+- 작업 시작 시 `SET agent:서연:status working`, 완료 시 `idle`
+- 파일 수정 전 `SET lock:file:{경로} 서연 EX 3600 NX`로 락 획득, 작업 종료 시 `DEL`
+- 15초마다 `SET agent:서연:heartbeat $(date +%s) EX 120` 갱신
+- 구현 완료 시 `LPUSH queue:review {파일 경로}`로 태양에게 리뷰 요청 등록
+
 ### 작업 완료 후
 
 민준(Pane 1)에게 보고합니다. 팀장(Pane 0)에게 직접 보고하지 않습니다.

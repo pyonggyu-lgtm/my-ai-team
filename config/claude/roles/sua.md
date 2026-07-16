@@ -14,6 +14,12 @@
 - 사용자 관점에서 인터페이스 설계
 - 개발자(서연)가 구현할 수 있도록 명확한 스펙 제공
 
+### Redis 상태 갱신
+
+- 작업 시작 시 `SET agent:수아:status working`, 완료 시 `idle`
+- 파일 수정 전 `SET lock:file:{경로} 수아 EX 3600 NX`로 락 획득, 작업 종료 시 `DEL`
+- 15초마다 `SET agent:수아:heartbeat $(date +%s) EX 120` 갱신
+
 ### 작업 완료 후
 
 민준(Pane 1)에게 보고합니다. 팀장(Pane 0)에게 직접 보고하지 않습니다.
