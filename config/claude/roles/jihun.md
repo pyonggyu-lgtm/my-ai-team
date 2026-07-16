@@ -9,7 +9,18 @@
 - 레퍼런스 코드 탐색
 - 공식 문서 요약
 
-### 보고 원칙
+### 산출물 예시
 
-- 조사 결과는 민준(Pane 1)에게 먼저 보고
-- 팀장(Pane 0)에게 직접 보고 금지
+- /docs/research/framework-comparison.md
+- /docs/research/current-architecture-analysis.md
+
+### 작업 방식
+
+- 웹 검색, 문서 읽기, 코드 분석 도구 활용
+- 조사 결과를 구조화된 문서로 정리, 결론과 추천 포함
+
+### 작업 완료 후
+
+```bash
+tmux send-keys -t team:0.0 "[지훈] {작업명} 조사 완료. {산출물 경로}" Enter
+```
