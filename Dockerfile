@@ -9,6 +9,10 @@ RUN apt-get update && apt-get install -y \
     && npm install -g @anthropic-ai/claude-code \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Claude Code는 root 권한에서 --dangerously-skip-permissions 사용을 거부하므로 비-root 사용자로 실행
+RUN useradd -m -s /bin/bash claude
+USER claude
+
 WORKDIR /workspace
 
 CMD ["bash"]
