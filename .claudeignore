@@ -1,0 +1,17 @@
+# 자격증명·비밀키
+.env
+.env.*
+*.pem
+*.key
+*credentials*
+*secret*
+
+# 클라우드 설정
+.aws/
+.gcloud/
+.azure/
+
+# 패스워드 파일
+*.htpasswd
+shadow
+passwd

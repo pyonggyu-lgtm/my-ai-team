@@ -127,7 +127,7 @@ for pane in 0 1 2 3 4 5; do
   if [ "$pane" -eq 0 ]; then
     # 팀장(쭌)만 서버 모드로 실행 — 모바일 등 외부에서 직접 접속 가능 (04-3장)
     tmux send-keys -t "$SESSION:0.0" \
-      "cd /workspace && unset CLAUDECODE && claude remote-control --name '팀장-쭌' --spawn session --verbose" Enter
+      "cd /workspace && unset CLAUDECODE && claude remote-control --name '팀장-쭌' --spawn session --permission-mode default --verbose" Enter
     wait_for_pane "$SESSION:0.0" "trust this folder" 20 && {
       tmux send-keys -t "$SESSION:0.0" Enter; sleep 1
     }
