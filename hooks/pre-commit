@@ -1,0 +1,8 @@
+#!/bin/bash
+# pre-commit — 테스트 파일 삭제/축소를 막는 안전망 (08-7)
+
+DELETED_TESTS=$(git diff --cached --diff-filter=D -- 'tests/*.test.ts' | wc -l)
+if [ "$DELETED_TESTS" -gt 0 ]; then
+  echo "❌ 테스트 파일이 삭제되었습니다. 커밋 차단."
+  exit 1
+fi
