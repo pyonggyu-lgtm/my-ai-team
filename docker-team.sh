@@ -10,6 +10,7 @@ NC='\033[0m'
 
 IMAGE="claude-team"
 CONTAINER="claude-env"
+REDIS_CONTAINER="claude-team-redis"
 PROJECT_DIR="${PROJECT_DIR:-$HOME/project}"
 
 # ── API 키 확인 ──────────────────────────────────────────────
@@ -35,12 +36,26 @@ if docker container inspect "$CONTAINER" &>/dev/null; then
   docker rm -f "$CONTAINER"
 fi
 
+# ── 네트워크 준비 (컨테이너 간 이름으로 통신) ─────────────────
+docker network inspect claude-team-net &>/dev/null || docker network create claude-team-net
+
+# ── Redis 컨테이너 기동 (6인 팀 상태 공유용, 08-5) ────────────
+if ! docker container inspect "$REDIS_CONTAINER" &>/dev/null; then
+  echo -e "\n${YELLOW}Redis 컨테이너 기동 중...${NC}"
+  docker run -d --name "$REDIS_CONTAINER" \
+    --network claude-team-net \
+    redis:7
+fi
+echo -e "${GREEN}✅ Redis 준비 완료 ($REDIS_CONTAINER, 호스트명: $REDIS_CONTAINER)${NC}"
+
 # ── 컨테이너 기동 ────────────────────────────────────────────
 echo -e "\n${YELLOW}컨테이너 기동 중...${NC}"
 mkdir -p "$PROJECT_DIR"
 
 docker run -d --name "$CONTAINER" \
+  --network claude-team-net \
   -e ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY" \
+  -e REDIS_HOST="$REDIS_CONTAINER" \
   -v "$PROJECT_DIR":/workspace \
   "$IMAGE" sleep infinity
 
