@@ -32,12 +32,28 @@ start_claude_in_pane() {
   tmux send-keys -t "$pane" \
     "cd /workspace && unset CLAUDECODE && $claude_bin --model $model --dangerously-skip-permissions" Enter
 
+  # 다이얼로그 0: 테마 선택 화면 (최초 실행 시) → Enter (기본 테마)
+  wait_for_pane "$pane" "Syntax theme" 15 && {
+    tmux send-keys -t "$pane" Enter; sleep 1
+  }
+
+  # 다이얼로그 0.5: API 키 사용 확인 (기본값 No) → Up + Enter
+  wait_for_pane "$pane" "Do you want to use this API key" 15 && {
+    tmux send-keys -t "$pane" Up; sleep 0.3
+    tmux send-keys -t "$pane" Enter; sleep 1
+  }
+
+  # 다이얼로그 0.7: 보안 안내 화면 → Enter
+  wait_for_pane "$pane" "Press Enter to continue" 15 && {
+    tmux send-keys -t "$pane" Enter; sleep 1
+  }
+
   # 다이얼로그 1: trust folder → Enter
   wait_for_pane "$pane" "trust this folder" 20 && {
     tmux send-keys -t "$pane" Enter; sleep 1
   }
 
-  # 다이얼로그 2: terms of service → Down + Enter
+  # 다이얼로그 2: Bypass Permissions 동의 (기본값 No, exit) → Down + Enter
   wait_for_pane "$pane" "I accept" 20 && {
     tmux send-keys -t "$pane" Down; sleep 0.5
     tmux send-keys -t "$pane" Enter; sleep 1
@@ -128,6 +144,16 @@ for pane in 0 1 2 3 4 5; do
     # 팀장(쭌)만 서버 모드로 실행 — 모바일 등 외부에서 직접 접속 가능 (04-3장)
     tmux send-keys -t "$SESSION:0.0" \
       "cd /workspace && unset CLAUDECODE && claude remote-control --name '팀장-쭌' --spawn session --permission-mode default --verbose" Enter
+    wait_for_pane "$SESSION:0.0" "Syntax theme" 15 && {
+      tmux send-keys -t "$SESSION:0.0" Enter; sleep 1
+    }
+    wait_for_pane "$SESSION:0.0" "Do you want to use this API key" 15 && {
+      tmux send-keys -t "$SESSION:0.0" Up; sleep 0.3
+      tmux send-keys -t "$SESSION:0.0" Enter; sleep 1
+    }
+    wait_for_pane "$SESSION:0.0" "Press Enter to continue" 15 && {
+      tmux send-keys -t "$SESSION:0.0" Enter; sleep 1
+    }
     wait_for_pane "$SESSION:0.0" "trust this folder" 20 && {
       tmux send-keys -t "$SESSION:0.0" Enter; sleep 1
     }
