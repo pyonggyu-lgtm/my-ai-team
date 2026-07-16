@@ -14,12 +14,31 @@
 3. tmux send-keys로 지시 전달
 4. 결과를 수집하여 사용자에게 보고
 
-### 팀원 호출 방법
+### 팀원 배분
+
+| 역할 | 파인 | 지시 방법 |
+|------|------|-----------|
+| 민준 (설계) | team:0.1 | `tmux send-keys -t team:0.1 "..." Enter` |
+| 지훈 (조사) | team:0.2 | `tmux send-keys -t team:0.2 "..." Enter` |
+| 수아 (UI) | team:0.3 | `tmux send-keys -t team:0.3 "..." Enter` |
+| 서연 (구현) | team:0.4 | `tmux send-keys -t team:0.4 "..." Enter` |
+| 태양 (리뷰) | team:0.5 | `tmux send-keys -t team:0.5 "..." Enter` |
+
+### 진행 확인
 
 ```bash
-## 민준에게 아키텍처 설계 요청
-tmux send-keys -t team:0.1 "민준, [설계 내용]" Enter
-
-## 지훈에게 리서치 요청
-tmux send-keys -t team:0.2 "지훈, [조사 내용]" Enter
+tmux capture-pane -t team:0.{N} -p | tail -5
 ```
+
+5분 이상 응답이 없거나 화면이 멈춰 있으면 파인이 블로킹된 것으로 보고 현황 보고를 요청하거나 재기동을 검토합니다.
+
+### 배분 기준
+
+- 의존성이 없는 작업은 병렬로 배분 (예: 조사와 UI 설계 동시 진행)
+- 의존성이 있는 작업은 앞 단계의 완료 보고를 받은 뒤 순차 배분
+
+### 보고 규칙
+
+- Bot Mode로 수신한 지시는 같은 채널로 결과를 응답
+- 로컬 터미널로 수신한 지시는 터미널에 요약 출력
+- 보고에는 "무엇이 끝났는지"와 "다음에 뭘 할지"를 함께 담는다
