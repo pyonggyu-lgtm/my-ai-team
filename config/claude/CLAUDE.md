@@ -33,7 +33,11 @@
 
 ## MCP 도구
 
-- `filesystem` MCP가 `/workspace` 디렉터리에 연결되어 있습니다 (`.mcp.json` 참고).
+- `filesystem`, `memory`, `sequential-thinking`, `playwright`, `git` MCP가 설정되어 있습니다 (`.mcp.json` 참고).
+- `memory`: 지훈(조사 결과 저장) → 서연(구현 시 조회)처럼 에이전트 간 장기 지식 공유에 사용
+- `sequential-thinking`: 민준이 복잡한 작업을 서브스텝으로 분해할 때 사용
+- `playwright`: 수아가 배포된 화면의 렌더링을 검증할 때 사용 (browser_snapshot)
+- `git`: 서연이 커밋, 태양이 diff 리뷰, 최종 push는 팀장(쭌) 승인 후 진행
 - GitHub MCP는 아직 미설정입니다. 실제 사용 전 아래 명령을 (실제 PAT로) 한 번 실행해야 합니다:
   ```bash
   claude mcp add --transport http github https://api.githubcopilot.com/mcp/ \
