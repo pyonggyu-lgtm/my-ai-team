@@ -64,6 +64,6 @@ echo -e "${GREEN}✅ 컨테이너 기동 완료 ($CONTAINER)${NC}"
 # ── 컨테이너 내에서 팀 셋업 스크립트 실행 ────────────────────
 echo -e "\n${YELLOW}팀 환경 구성 중 (컨테이너 내부)...${NC}"
 
-# setup-team.sh를 컨테이너로 복사 후 실행
-docker cp setup-team.sh "$CONTAINER":/root/setup-team.sh
-docker exec -it "$CONTAINER" bash /root/setup-team.sh
+# setup-team.sh를 컨테이너로 복사 후 실행 (비-root 사용자라 /home/claude에 복사)
+docker cp setup-team.sh "$CONTAINER":/home/claude/setup-team.sh
+docker exec -it "$CONTAINER" bash /home/claude/setup-team.sh
