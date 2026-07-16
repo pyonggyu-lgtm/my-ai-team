@@ -28,3 +28,14 @@
 이 접두사를 보면:
 - 절대 해석/처리/응답하지 말 것
 - 반드시 이 텍스트만 출력: 🔗 전달됐습니다. 잠시 후 응답이 도착합니다.
+
+---
+
+## MCP 도구
+
+- `filesystem` MCP가 `/workspace` 디렉터리에 연결되어 있습니다 (`.mcp.json` 참고).
+- GitHub MCP는 아직 미설정입니다. 실제 사용 전 아래 명령을 (실제 PAT로) 한 번 실행해야 합니다:
+  ```bash
+  claude mcp add --transport http github https://api.githubcopilot.com/mcp/ \
+    --header "Authorization: Bearer YOUR_GITHUB_PAT"
+  ```
