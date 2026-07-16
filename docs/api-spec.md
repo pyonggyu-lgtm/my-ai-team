@@ -1,5 +1,39 @@
 # API 명세 — 헬스체크
 
+## GET /ping
+
+서비스 라이브니스(liveness) 확인용 최소 엔드포인트. 인증 불필요, 파라미터 없음.
+
+### 요청
+```
+GET /ping
+```
+
+### 응답 — 200 OK
+`Content-Type: application/json`
+
+| 필드 | 타입 | 설명 | 출처 |
+|---|---|---|---|
+| `message` | string | 항상 `"pong"` | 리터럴 |
+
+예시:
+```json
+{
+  "message": "pong"
+}
+```
+
+### 구현 가이드 (진오 참조)
+- `src/app.js`에 `app.get('/ping', ...)` 라우트 1개 추가. `res.json({ message: 'pong' })`.
+- `/health`와 동일한 export 구조 재사용 (신규 파일·의존성 없음).
+
+### 테스트 요구사항 (tests/ping.test.js — supertest+jest)
+1. `GET /ping` → 200
+2. 응답 body 가 `{ message: "pong" }`
+3. `Content-Type` 이 JSON
+
+---
+
 ## GET /health
 
 서비스 생존 및 기본 메타데이터 확인용 엔드포인트. 인증 불필요.
