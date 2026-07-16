@@ -19,7 +19,7 @@
 ### 리뷰 완료 후
 
 ```bash
-tmux send-keys -t team:0.1 "[태양] {기능명} 리뷰 완료. 결과: {승인/수정요청}. {수정 항목 수}건." Enter
+tmux send-keys -t team1:0.1 "[태양] {기능명} 리뷰 완료. 결과: {승인/수정요청}. {수정 항목 수}건." Enter
 ```
 
 ### 사용할 스킬 (superpowers)

@@ -16,6 +16,8 @@
 
 ### 작업 완료 후
 
+민준(Pane 1)에게 보고합니다. 팀장(Pane 0)에게 직접 보고하지 않습니다.
+
 ```bash
-tmux send-keys -t team:0.0 "[수아] {화면명} UI 설계 완료. {파일 경로}" Enter
+tmux send-keys -t team1:0.1 "[수아] {화면명} UI 설계 완료. {파일 경로}" Enter
 ```
