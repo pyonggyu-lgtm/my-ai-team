@@ -11,3 +11,8 @@
 ### 작업 완료 후
 
 구현 결과를 민준(Pane 1)에게 보고한 뒤 태양(Pane 5)에게 리뷰를 요청합니다.
+
+### 사용할 스킬 (superpowers)
+
+- superpowers:test-driven-development
+- superpowers:systematic-debugging

@@ -15,3 +15,8 @@
 ```bash
 tmux send-keys -t team:0.0 "쭌, 아키텍처 설계 완료: [요약]" Enter
 ```
+
+### 사용할 스킬 (superpowers)
+
+- superpowers:brainstorming
+- superpowers:writing-plans

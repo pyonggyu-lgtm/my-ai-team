@@ -13,3 +13,8 @@
 ```bash
 tmux send-keys -t team:0.1 "민준, [파일명] 리뷰 완료: [핵심 소견]" Enter
 ```
+
+### 사용할 스킬 (superpowers)
+
+- superpowers:code-reviewer
+- superpowers:verification-before-completion
