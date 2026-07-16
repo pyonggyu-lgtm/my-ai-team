@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# heartbeat-check.sh — 쭌 5분 체크루프에서 호출
+# heartbeat-check.sh — 진서 5분 체크루프에서 호출
 # 사용: REDIS_HOST=claude-team-redis bash scripts/heartbeat-check.sh
 
 REDIS_HOST="${REDIS_HOST:-claude-team-redis}"
-AGENTS=(쭌 민준 지훈 수아 서연 태양)
+AGENTS=(진서 진록 진삼 진사 진오 진육)
 
 for AGENT in "${AGENTS[@]}"; do
   TTL=$(redis-cli -h "$REDIS_HOST" TTL "agent:${AGENT}:heartbeat")

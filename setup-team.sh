@@ -125,27 +125,27 @@ tmux set-option -t "$SESSION" pane-border-format " #{pane_title} "
 tmux set-option -t "$SESSION" allow-rename off
 
 # 파인 이름 설정
-tmux select-pane -t "$SESSION:0.0" -T "쭌"
-tmux select-pane -t "$SESSION:0.1" -T "민준 아키텍트"
-tmux select-pane -t "$SESSION:0.2" -T "지훈 리서쳐"
-tmux select-pane -t "$SESSION:0.3" -T "수아 UI/UX디자이너"
-tmux select-pane -t "$SESSION:0.4" -T "서연 개발자"
-tmux select-pane -t "$SESSION:0.5" -T "태양 QA·리뷰어"
+tmux select-pane -t "$SESSION:0.0" -T "진서"
+tmux select-pane -t "$SESSION:0.1" -T "진록 아키텍트"
+tmux select-pane -t "$SESSION:0.2" -T "진삼 리서쳐"
+tmux select-pane -t "$SESSION:0.3" -T "진사 UI/UX디자이너"
+tmux select-pane -t "$SESSION:0.4" -T "진오 개발자"
+tmux select-pane -t "$SESSION:0.5" -T "진육 QA·리뷰어"
 
 echo "  ✅ 레이아웃 구성 완료 (6 panes)"
 
 # ── [3/4] Claude 자동 실행 ──────────────────────────────────
 echo -e "\n${YELLOW}[3/4] Claude 실행 중... (파인당 최대 1분)${NC}"
 
-MEMBER_NAMES=("쭌" "민준" "지훈" "수아" "서연" "태양")
+MEMBER_NAMES=("진서" "진록" "진삼" "진사" "진오" "진육")
 MEMBER_HOMES=("jun" "minjun" "jihun" "sua" "seoyeon" "taeyang") # config/claude/roles/*.md 파일명과 일치
 MEMBER_MODELS=(
-  "claude-opus-4-8"   # 쭌 (팀장 — 판단·조율 중심)
-  "claude-opus-4-8"   # 민준 (PM — 설계·추론 중심)
-  "claude-sonnet-4-6" # 지훈
-  "claude-sonnet-4-6" # 수아
-  "claude-sonnet-4-6" # 서연
-  "claude-sonnet-4-6" # 태양
+  "claude-opus-4-8"   # 진서 (팀장 — 판단·조율 중심)
+  "claude-opus-4-8"   # 진록 (PM — 설계·추론 중심)
+  "claude-sonnet-4-6" # 진삼
+  "claude-sonnet-4-6" # 진사
+  "claude-sonnet-4-6" # 진오
+  "claude-sonnet-4-6" # 진육
 )
 
 echo "  파인별 역할 CLAUDE.md 구성 중..."
@@ -160,11 +160,11 @@ for pane in 0 1 2 3 4 5; do
   AGENT_HOME="/home/claude/agents/${MEMBER_HOMES[$pane]}"
 
   if [ "$pane" -eq 0 ]; then
-    # 팀장(쭌)만 서버 모드로 실행 — 모바일 등 외부에서 직접 접속 가능 (04-3장)
+    # 팀장(진서)만 서버 모드로 실행 — 모바일 등 외부에서 직접 접속 가능 (04-3장)
     # 주의: Remote-Control은 OAuth 로그인이 필요해 API 키만으로는 동작하지 않는다 (04-1장).
     # OAuth 미설정 환경이면 이 명령은 실패하며, 아래에서 일반 모드로 대체 실행해야 한다.
     tmux send-keys -t "$SESSION:0.0" \
-      "cd /workspace && unset CLAUDECODE && HOME=$AGENT_HOME claude remote-control --name '팀장-쭌' --spawn session --permission-mode default --verbose" Enter
+      "cd /workspace && unset CLAUDECODE && HOME=$AGENT_HOME claude remote-control --name '팀장-진서' --spawn session --permission-mode default --verbose" Enter
     wait_for_pane "$SESSION:0.0" "Syntax theme" 15 && {
       tmux send-keys -t "$SESSION:0.0" Enter; sleep 1
     }

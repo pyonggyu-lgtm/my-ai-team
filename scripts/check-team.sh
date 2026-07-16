@@ -4,7 +4,7 @@
 
 SESSION="team1"
 EXPECTED_PANES=6
-TITLES=("쭌" "민준 아키텍트" "지훈 리서쳐" "수아 UI/UX디자이너" "서연 개발자" "태양 QA·리뷰어")
+TITLES=("진서" "진록 아키텍트" "진삼 리서쳐" "진사 UI/UX디자이너" "진오 개발자" "진육 QA·리뷰어")
 
 # 1. 세션 존재 확인
 if ! tmux has-session -t "$SESSION" 2>/dev/null; then

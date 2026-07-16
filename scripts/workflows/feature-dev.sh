@@ -7,4 +7,4 @@ FEATURE_NAME="$1"
 
 team-send 2 "[$FEATURE_NAME] 기술 조사 시작해줘"
 team-send 3 "[$FEATURE_NAME] UI 설계 시작해줘"
-echo "Phase 1 시작: 조사(지훈) + 디자인(수아) 병렬 진행"
+echo "Phase 1 시작: 조사(진삼) + 디자인(진사) 병렬 진행"

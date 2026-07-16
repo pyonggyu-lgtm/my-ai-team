@@ -34,10 +34,10 @@
 ## MCP 도구
 
 - `filesystem`, `memory`, `sequential-thinking`, `playwright`, `git` MCP가 설정되어 있습니다 (`.mcp.json` 참고).
-- `memory`: 지훈(조사 결과 저장) → 서연(구현 시 조회)처럼 에이전트 간 장기 지식 공유에 사용
-- `sequential-thinking`: 민준이 복잡한 작업을 서브스텝으로 분해할 때 사용
-- `playwright`: 수아가 배포된 화면의 렌더링을 검증할 때 사용 (browser_snapshot)
-- `git`: 서연이 커밋, 태양이 diff 리뷰, 최종 push는 팀장(쭌) 승인 후 진행
+- `memory`: 진삼(조사 결과 저장) → 진오(구현 시 조회)처럼 에이전트 간 장기 지식 공유에 사용
+- `sequential-thinking`: 진록이 복잡한 작업을 서브스텝으로 분해할 때 사용
+- `playwright`: 진사가 배포된 화면의 렌더링을 검증할 때 사용 (browser_snapshot)
+- `git`: 진오가 커밋, 진육이 diff 리뷰, 최종 push는 팀장(진서) 승인 후 진행
 - GitHub MCP는 아직 미설정입니다. 실제 사용 전 아래 명령을 (실제 PAT로) 한 번 실행해야 합니다:
   ```bash
   claude mcp add --transport http github https://api.githubcopilot.com/mcp/ \
@@ -58,14 +58,14 @@
 
 | 담당 | 영역 |
 |---|---|
-| 민준 | docs/, .planning/ |
-| 지훈 | docs/research/ |
-| 수아 | src/styles/, assets/, docs/design/ |
-| 서연 | src/ (styles/ 제외), tests/ |
-| 태양 | 파일 수정 없음, 읽기·리뷰만 |
+| 진록 | docs/, .planning/ |
+| 진삼 | docs/research/ |
+| 진사 | src/styles/, assets/, docs/design/ |
+| 진오 | src/ (styles/ 제외), tests/ |
+| 진육 | 파일 수정 없음, 읽기·리뷰만 |
 
 - 설계 → 구현 → 리뷰 순서를 지켜 단계 간 충돌을 원천 차단한다 (리뷰 중에는 해당 파일을 수정하지 않는다)
-- 충돌 발견 시 스스로 해결하지 않고 민준에게 보고하여 판단을 받는다
+- 충돌 발견 시 스스로 해결하지 않고 진록에게 보고하여 판단을 받는다
 
 ---
 

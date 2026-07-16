@@ -35,7 +35,7 @@ tmux send-keys -t "$PANE" C-u 2>/dev/null; sleep 0.2
 
 if [[ "$PANE_IDX" -eq 0 ]]; then
   tmux send-keys -t "$PANE" \
-    "cd /workspace && unset CLAUDECODE && HOME=$AGENT_HOME claude remote-control --name '팀장-쭌' --spawn session --permission-mode default --verbose" Enter
+    "cd /workspace && unset CLAUDECODE && HOME=$AGENT_HOME claude remote-control --name '팀장-진서' --spawn session --permission-mode default --verbose" Enter
 else
   claude_bin="$(command -v claude)"
   tmux send-keys -t "$PANE" \
