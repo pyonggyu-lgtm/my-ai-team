@@ -23,14 +23,14 @@ wait_for_pane() {
 
 # ── 유틸: Claude 실행 + 다이얼로그 자동 처리 ────────────────
 start_claude_in_pane() {
-  local pane="$1" model="${2:-claude-sonnet-4-6}"
+  local pane="$1" model="${2:-claude-sonnet-4-6}" extra_flags="$3"
   local claude_bin; claude_bin="$(command -v claude)"
 
   tmux send-keys -t "$pane" C-c 2>/dev/null; sleep 0.3
   tmux send-keys -t "$pane" C-u 2>/dev/null; sleep 0.2
 
   tmux send-keys -t "$pane" \
-    "cd /workspace && unset CLAUDECODE && $claude_bin --model $model --dangerously-skip-permissions" Enter
+    "cd /workspace && unset CLAUDECODE && $claude_bin --model $model --dangerously-skip-permissions $extra_flags" Enter
 
   # 다이얼로그 1: trust folder → Enter
   wait_for_pane "$pane" "trust this folder" 20 && {
@@ -123,7 +123,9 @@ MEMBER_MODELS=(
 
 for pane in 0 1 2 3 4 5; do
   echo -n "  Pane $pane (${MEMBER_NAMES[$pane]}): "
-  start_claude_in_pane "$SESSION:0.$pane" "${MEMBER_MODELS[$pane]}"
+  extra_flags=""
+  [ "$pane" -eq 0 ] && extra_flags="--remote-control '팀장 쭌'"
+  start_claude_in_pane "$SESSION:0.$pane" "${MEMBER_MODELS[$pane]}" "$extra_flags"
 
   tmux capture-pane -t "$SESSION:0.$pane" -p 2>/dev/null | grep -q ">" \
     && echo -e "${GREEN}✅ 준비 완료${NC}" \
