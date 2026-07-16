@@ -1,0 +1,20 @@
+name: Conflict Check
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for merge conflicts with main
+        run: |
+          git fetch origin main
+          git merge-tree --write-tree HEAD origin/main | \
+            grep -c "<<<<<<" && echo "충돌 발견" && exit 1 || echo "충돌 없음"
