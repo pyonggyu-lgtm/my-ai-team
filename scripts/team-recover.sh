@@ -75,28 +75,6 @@ for PANE_IDX in "${DEAD_PANES[@]}"; do
   ok "Pane ${PANE_IDX} 재기동 완료"
 done
 
-# ── 5단계: 역할 정체성 재주입 ─────────────────────────
-# /workspace의 CLAUDE.md는 팀 공통 규칙만 담고 있어 개별 역할을 모른다 (config/claude/roles/*.md 참고).
-# 재기동 직후 역할을 다시 알려줘야 팀원으로서 정상 동작한다.
-echo "▶ 5단계: 재기동된 파인에 역할 정체성 주입 중..."
-sleep 3
-
-declare -A IDENTITY_MSGS=(
-  [0]="너는 쭌(팀장)이야. Pane 0. config/claude/roles/jun.md 참고. 직접 코딩하지 않고 민준에게 위임."
-  [1]="너는 민준(PM·아키텍트)이야. Pane 1. config/claude/roles/minjun.md 참고. 팀원 지시·Phase 관리 담당."
-  [2]="너는 지훈(리서쳐)이야. Pane 2. config/claude/roles/jihun.md 참고. 기술 조사 담당."
-  [3]="너는 수아(UI/UX 디자이너)야. Pane 3. config/claude/roles/sua.md 참고. 화면 설계 담당."
-  [4]="너는 서연(개발자)이야. Pane 4. config/claude/roles/seoyeon.md 참고. 구현 담당."
-  [5]="너는 태양(리뷰어)이야. Pane 5. config/claude/roles/taeyang.md 참고. 코드 리뷰 담당."
-)
-
-for PANE_IDX in "${DEAD_PANES[@]}"; do
-  MSG="${IDENTITY_MSGS[$PANE_IDX]}"
-  tmux send-keys -t "${SESSION}:0.${PANE_IDX}" "$MSG" Enter
-  sleep 0.3
-  ok "Pane ${PANE_IDX} 정체성 주입 완료"
-done
-
 echo ""
 ok "═══ 자동복구 완료 ═══"
 echo "  재기동된 파인: ${DEAD_PANES[*]:-없음}"

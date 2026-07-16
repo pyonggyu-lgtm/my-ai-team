@@ -11,7 +11,7 @@ NC='\033[0m'
 IMAGE="claude-team"
 CONTAINER="claude-env"
 REDIS_CONTAINER="claude-team-redis"
-PROJECT_DIR="${PROJECT_DIR:-$HOME/project}"
+PROJECT_DIR="${PROJECT_DIR:-$(pwd)}"
 
 # ── API 키 확인 ──────────────────────────────────────────────
 if [ -z "$ANTHROPIC_API_KEY" ]; then

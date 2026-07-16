@@ -21,16 +21,26 @@ wait_for_pane() {
   return 1
 }
 
+# ── 유틸: 파인별 HOME에 역할 전용 CLAUDE.md 구성 (공통 + roles/{name}.md) ──
+setup_agent_home() {
+  local name="$1"
+  local home="/home/claude/agents/$name"
+  mkdir -p "$home/.claude"
+  cat /workspace/config/claude/CLAUDE.md /workspace/config/claude/roles/"$name".md \
+    > "$home/.claude/CLAUDE.md"
+}
+
 # ── 유틸: Claude 실행 + 다이얼로그 자동 처리 ────────────────
+# $3: 에이전트 HOME 디렉터리 (파인별로 다른 역할을 로드하기 위함)
 start_claude_in_pane() {
-  local pane="$1" model="${2:-claude-sonnet-4-6}"
+  local pane="$1" model="${2:-claude-sonnet-4-6}" agent_home="$3"
   local claude_bin; claude_bin="$(command -v claude)"
 
   tmux send-keys -t "$pane" C-c 2>/dev/null; sleep 0.3
   tmux send-keys -t "$pane" C-u 2>/dev/null; sleep 0.2
 
   tmux send-keys -t "$pane" \
-    "cd /workspace && unset CLAUDECODE && $claude_bin --model $model --dangerously-skip-permissions" Enter
+    "cd /workspace && unset CLAUDECODE && HOME=$agent_home $claude_bin --model $model --dangerously-skip-permissions" Enter
 
   # 다이얼로그 0: 테마 선택 화면 (최초 실행 시) → Enter (기본 테마)
   wait_for_pane "$pane" "Syntax theme" 15 && {
@@ -128,6 +138,7 @@ echo "  ✅ 레이아웃 구성 완료 (6 panes)"
 echo -e "\n${YELLOW}[3/4] Claude 실행 중... (파인당 최대 1분)${NC}"
 
 MEMBER_NAMES=("쭌" "민준" "지훈" "수아" "서연" "태양")
+MEMBER_HOMES=("jun" "minjun" "jihun" "sua" "seoyeon" "taeyang") # config/claude/roles/*.md 파일명과 일치
 MEMBER_MODELS=(
   "claude-opus-4-8"   # 쭌 (팀장 — 판단·조율 중심)
   "claude-opus-4-8"   # 민준 (PM — 설계·추론 중심)
@@ -137,13 +148,23 @@ MEMBER_MODELS=(
   "claude-sonnet-4-6" # 태양
 )
 
+echo "  파인별 역할 CLAUDE.md 구성 중..."
+for name in "${MEMBER_HOMES[@]}"; do
+  setup_agent_home "$name"
+done
+echo "  ✅ 6개 역할 HOME 구성 완료"
+echo ""
+
 for pane in 0 1 2 3 4 5; do
   echo -n "  Pane $pane (${MEMBER_NAMES[$pane]}): "
+  AGENT_HOME="/home/claude/agents/${MEMBER_HOMES[$pane]}"
 
   if [ "$pane" -eq 0 ]; then
     # 팀장(쭌)만 서버 모드로 실행 — 모바일 등 외부에서 직접 접속 가능 (04-3장)
+    # 주의: Remote-Control은 OAuth 로그인이 필요해 API 키만으로는 동작하지 않는다 (04-1장).
+    # OAuth 미설정 환경이면 이 명령은 실패하며, 아래에서 일반 모드로 대체 실행해야 한다.
     tmux send-keys -t "$SESSION:0.0" \
-      "cd /workspace && unset CLAUDECODE && claude remote-control --name '팀장-쭌' --spawn session --permission-mode default --verbose" Enter
+      "cd /workspace && unset CLAUDECODE && HOME=$AGENT_HOME claude remote-control --name '팀장-쭌' --spawn session --permission-mode default --verbose" Enter
     wait_for_pane "$SESSION:0.0" "Syntax theme" 15 && {
       tmux send-keys -t "$SESSION:0.0" Enter; sleep 1
     }
@@ -161,8 +182,13 @@ for pane in 0 1 2 3 4 5; do
       tmux send-keys -t "$SESSION:0.0" Down; sleep 0.5
       tmux send-keys -t "$SESSION:0.0" Enter; sleep 1
     }
+    # Remote-Control은 OAuth 없이 "Error: You must be logged in" 으로 즉시 실패한다.
+    # 그 경우 일반 모드(--dangerously-skip-permissions)로 대체 실행한다.
+    wait_for_pane "$SESSION:0.0" "must be logged in" 5 && {
+      start_claude_in_pane "$SESSION:0.0" "${MEMBER_MODELS[0]}" "$AGENT_HOME"
+    }
   else
-    start_claude_in_pane "$SESSION:0.$pane" "${MEMBER_MODELS[$pane]}"
+    start_claude_in_pane "$SESSION:0.$pane" "${MEMBER_MODELS[$pane]}" "$AGENT_HOME"
   fi
 
   tmux capture-pane -t "$SESSION:0.$pane" -p 2>/dev/null | grep -q ">" \
