@@ -45,11 +45,16 @@ declare -A ROLE=([0]="진서" [1]="진록" [2]="진삼" [3]="진사" [4]="진오
 
 DEAD_PANES=()
 for PANE_IDX in 0 1 2 3 4 5; do
-  LAST=$(tmux capture-pane -t "${SESSION}:0.${PANE_IDX}" -p 2>/dev/null | tail -3)
-  if echo "$LAST" | grep -qE '❯\s*$|>\s*$|claude>|\$\s*$'; then
-    ok "Pane ${PANE_IDX} (${ROLE[$PANE_IDX]}): 활성"
+  # 화면 텍스트("❯", "$" 등) 패턴은 Claude Code 화면·bash 프롬프트 양쪽에 다 나타날 수
+  # 있어 오탐이 잦았다(bash 프롬프트도 "$"로 끝나서 "활성"으로 잘못 판정됨). 대신
+  # 이 파인에서 실제로 돌고 있는 프로세스가 claude인지로 판정한다(오탐 없음).
+  # 주의: list-panes에 파인 타깃을 줘도 창 전체 파인이 나오므로 반드시
+  # display-message로 그 파인 하나만 정확히 조회해야 한다.
+  CMD=$(tmux display-message -t "${SESSION}:0.${PANE_IDX}" -p '#{pane_current_command}' 2>/dev/null)
+  if [ "$CMD" = "claude" ]; then
+    ok "Pane ${PANE_IDX} (${ROLE[$PANE_IDX]}): 활성 (claude 실행 중)"
   else
-    warn "Pane ${PANE_IDX} (${ROLE[$PANE_IDX]}): 응답 없음 — 재기동 대상"
+    warn "Pane ${PANE_IDX} (${ROLE[$PANE_IDX]}): claude 미실행(${CMD:-없음}) — 재기동 대상"
     DEAD_PANES+=("$PANE_IDX")
   fi
 done

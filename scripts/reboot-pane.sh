@@ -88,6 +88,13 @@ if [[ "$PANE_IDX" -eq 0 ]]; then
   }
 fi
 
+# 여러 파인을 연달아 재기동할 때(team-recover.sh) 이전 send-keys의 일부(재시작
+# 명령어 등)가 클로드 입력창에 텍스트로 남아있는 채 발견되는 경우가 실전에서
+# 재현됐다(Ctrl+U 두 번으로 지워지는 것까지 확인). 최종 판정 전에 방어적으로
+# 입력창을 비운다 — 이미 비어 있으면 아무 영향 없다.
+tmux send-keys -t "$PANE" C-u 2>/dev/null; sleep 0.2
+tmux send-keys -t "$PANE" C-u 2>/dev/null; sleep 0.2
+
 # 실제 프롬프트 기호는 "❯"(유니코드)라 ">"와 매치되지 않아 항상 타임아웃하던 버그.
 # team-recover.sh가 이 exit code로 성공/실패를 판정하므로, 정확한 문구로 교체.
 # 입력창 힌트 'Try "..."'로 판정 — 파인이 작아 릴리스 노트 팝업 등이 뜨면 그 아래
