@@ -30,8 +30,14 @@ cat /workspace/config/claude/CLAUDE.md "/workspace/config/claude/roles/${HOMES[$
   > "$AGENT_HOME/.claude/CLAUDE.md"
 
 PANE="${SESSION}:0.${PANE_IDX}"
+# Ctrl+C는 Claude Code가 대기(idle) 상태일 때는 무시된다(생성 중일 때만 취소 동작) —
+# 그러면 앱이 안 꺼진 채로 다음 재시작 명령어가 셸이 아니라 기존 Claude 채팅창에
+# 그대로 텍스트로 입력돼버린다(실전에서 재현됨). /exit로 확실히 종료시킨다.
+# 이미 bash 상태인 파인에 보내도 "No such file or directory"만 뜨고 무해하다.
+tmux send-keys -t "$PANE" Escape 2>/dev/null; sleep 0.2
 tmux send-keys -t "$PANE" C-c 2>/dev/null; sleep 0.3
 tmux send-keys -t "$PANE" C-u 2>/dev/null; sleep 0.2
+tmux send-keys -t "$PANE" '/exit' Enter; sleep 1
 
 if [[ "$PANE_IDX" -eq 0 ]]; then
   tmux send-keys -t "$PANE" \
@@ -82,4 +88,8 @@ if [[ "$PANE_IDX" -eq 0 ]]; then
   }
 fi
 
-wait_for_pane "$PANE" ">" 30
+# 실제 프롬프트 기호는 "❯"(유니코드)라 ">"와 매치되지 않아 항상 타임아웃하던 버그.
+# team-recover.sh가 이 exit code로 성공/실패를 판정하므로, 정확한 문구로 교체.
+# 입력창 힌트 'Try "..."'로 판정 — 파인이 작아 릴리스 노트 팝업 등이 뜨면 그 아래
+# 상태줄("for shortcuts")은 화면 밖으로 밀려날 수 있지만 입력창 자체는 항상 보인다.
+wait_for_pane "$PANE" 'Try "' 30

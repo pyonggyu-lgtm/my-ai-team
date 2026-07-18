@@ -69,7 +69,12 @@ start_claude_in_pane() {
     tmux send-keys -t "$pane" Enter; sleep 1
   }
 
-  wait_for_pane "$pane" ">" 30
+  # 실제 프롬프트 기호는 "❯"(유니코드)라 ">"와 매치되지 않아 항상 타임아웃하던 버그.
+  # 입력창 힌트 문구 'Try "..."'로 판정 — 파인이 9줄 안팎으로 작아 릴리스 노트 팝업 등이
+  # 뜨면 그 아래 상태줄("for shortcuts")은 화면 밖으로 밀려날 수 있지만 입력창 자체는
+  # 항상 보인다. 그래도 실패 시 || true로 흡수해 set -e가 이 파인 하나 때문에
+  # 스크립트 전체(나머지 파인들)를 죽이지 않게 한다.
+  wait_for_pane "$pane" 'Try "' 30 || true
 }
 
 # ── [0/4] 사전 요구사항 확인 ────────────────────────────────
@@ -186,12 +191,12 @@ for pane in 0 1 2 3 4 5; do
     # 그 경우 일반 모드(--dangerously-skip-permissions)로 대체 실행한다.
     wait_for_pane "$SESSION:0.0" "must be logged in" 5 && {
       start_claude_in_pane "$SESSION:0.0" "${MEMBER_MODELS[0]}" "$AGENT_HOME"
-    }
+    } || true
   else
-    start_claude_in_pane "$SESSION:0.$pane" "${MEMBER_MODELS[$pane]}" "$AGENT_HOME"
+    start_claude_in_pane "$SESSION:0.$pane" "${MEMBER_MODELS[$pane]}" "$AGENT_HOME" || true
   fi
 
-  tmux capture-pane -t "$SESSION:0.$pane" -p 2>/dev/null | grep -q ">" \
+  tmux capture-pane -t "$SESSION:0.$pane" -p 2>/dev/null | grep -q 'Try "' \
     && echo -e "${GREEN}✅ 준비 완료${NC}" \
     || echo -e "${RED}⚠️ 타임아웃 — 수동 확인 필요${NC}"
 done
