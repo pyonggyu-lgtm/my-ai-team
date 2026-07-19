@@ -64,13 +64,17 @@ start_claude_in_pane() {
   }
 
   # 다이얼로그 2: Bypass Permissions 동의 (기본값 No, exit) → Down + Enter
-  # v2.1.215부터 문구가 "I accept"(메뉴 항목 "2. Yes, I accept")에서
-  # "Quick safety check: Is this a project you created or one you trust?"로
-  # 바뀌었고, 예전엔 두 개였던 "trust this folder"/"I accept" 다이얼로그도
-  # 이 하나로 합쳐졌다. 좁고 짧은 파인(1~4번)에서는 옵션 2번 텍스트가 줄바꿈으로
-  # 화면 밖에 밀려 "I accept" 문자열 자체가 안 보여 항상 타임아웃하던 버그 —
-  # 화면 크기와 무관하게 항상 보이는 "Quick safety check" 문구로 판정한다.
-  wait_for_pane "$pane" "Quick safety check" 20 && {
+  # v2.1.215부터 문구가 "I accept"(메뉴 항목 "2. Yes, I accept")에서 바뀌었는데,
+  # 실전에서 두 가지 다른 표현이 섞여 나오는 걸 확인함:
+  #   변형 A: "Quick safety check: Is this a project you created or one you trust?"
+  #           (예전 "trust this folder"/"I accept" 두 다이얼로그가 합쳐진 버전)
+  #   변형 B: "WARNING: Claude Code running in Bypass Permissions mode"
+  # 둘 다 옵션 2번("2. Yes, I accept")이 좁고 짧은 파인에서는 줄바꿈으로 화면
+  # 밖에 밀려 안 보일 수 있어 "I accept"만으로는 못 잡고, "Quick safety check"만
+  # 으로는 변형 B를 못 잡음(실전에서 이걸로 pane 0이 타임아웃됨). 두 변형 모두
+  # 공통으로 포함하는 "By proceeding, you accept all responsibility..." 문장의
+  # 일부로 판정한다.
+  wait_for_pane "$pane" "you accept all responsibility" 20 && {
     tmux send-keys -t "$pane" Down; sleep 0.5
     tmux send-keys -t "$pane" Enter; sleep 1
   }
@@ -192,7 +196,7 @@ for pane in 0 1 2 3 4 5; do
     wait_for_pane "$SESSION:0.0" "trust this folder" 20 && {
       tmux send-keys -t "$SESSION:0.0" Enter; sleep 1
     }
-    wait_for_pane "$SESSION:0.0" "Quick safety check" 20 && {
+    wait_for_pane "$SESSION:0.0" "you accept all responsibility" 20 && {
       tmux send-keys -t "$SESSION:0.0" Down; sleep 0.5
       tmux send-keys -t "$SESSION:0.0" Enter; sleep 1
     }
