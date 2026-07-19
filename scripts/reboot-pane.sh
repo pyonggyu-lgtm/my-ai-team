@@ -69,7 +69,7 @@ wait_for_pane "$PANE" "trust this folder" 20 && {
   tmux send-keys -t "$PANE" Enter; sleep 1
 }
 # 다이얼로그 2: Bypass Permissions 동의 (기본값 No, exit) → Down + Enter
-wait_for_pane "$PANE" "I accept" 20 && {
+wait_for_pane "$PANE" "Quick safety check" 20 && {
   tmux send-keys -t "$PANE" Down; sleep 0.5
   tmux send-keys -t "$PANE" Enter; sleep 1
 }
@@ -84,7 +84,7 @@ if [[ "$PANE_IDX" -eq 0 ]]; then
     wait_for_pane "$PANE" "trust this folder" 20 && {
       tmux send-keys -t "$PANE" Enter; sleep 1
     }
-    wait_for_pane "$PANE" "I accept" 20 && {
+    wait_for_pane "$PANE" "Quick safety check" 20 && {
       tmux send-keys -t "$PANE" Down; sleep 0.5
       tmux send-keys -t "$PANE" Enter; sleep 1
     }

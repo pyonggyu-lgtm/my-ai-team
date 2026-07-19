@@ -64,7 +64,13 @@ start_claude_in_pane() {
   }
 
   # 다이얼로그 2: Bypass Permissions 동의 (기본값 No, exit) → Down + Enter
-  wait_for_pane "$pane" "I accept" 20 && {
+  # v2.1.215부터 문구가 "I accept"(메뉴 항목 "2. Yes, I accept")에서
+  # "Quick safety check: Is this a project you created or one you trust?"로
+  # 바뀌었고, 예전엔 두 개였던 "trust this folder"/"I accept" 다이얼로그도
+  # 이 하나로 합쳐졌다. 좁고 짧은 파인(1~4번)에서는 옵션 2번 텍스트가 줄바꿈으로
+  # 화면 밖에 밀려 "I accept" 문자열 자체가 안 보여 항상 타임아웃하던 버그 —
+  # 화면 크기와 무관하게 항상 보이는 "Quick safety check" 문구로 판정한다.
+  wait_for_pane "$pane" "Quick safety check" 20 && {
     tmux send-keys -t "$pane" Down; sleep 0.5
     tmux send-keys -t "$pane" Enter; sleep 1
   }
@@ -186,7 +192,7 @@ for pane in 0 1 2 3 4 5; do
     wait_for_pane "$SESSION:0.0" "trust this folder" 20 && {
       tmux send-keys -t "$SESSION:0.0" Enter; sleep 1
     }
-    wait_for_pane "$SESSION:0.0" "I accept" 20 && {
+    wait_for_pane "$SESSION:0.0" "Quick safety check" 20 && {
       tmux send-keys -t "$SESSION:0.0" Down; sleep 0.5
       tmux send-keys -t "$SESSION:0.0" Enter; sleep 1
     }
