@@ -18,7 +18,7 @@ AGENT_HOME="/home/claude/agents/${HOMES[$PANE_IDX]}"
 wait_for_pane() {
   local pane="$1" pattern="$2" timeout="${3:-30}" waited=0
   while [ $waited -lt $timeout ]; do
-    tmux capture-pane -t "$pane" -p 2>/dev/null | grep -q "$pattern" && return 0
+    tmux capture-pane -t "$pane" -p 2>/dev/null | grep -qE "$pattern" && return 0
     sleep 1; waited=$((waited + 1))
   done
   return 1
@@ -40,8 +40,11 @@ tmux send-keys -t "$PANE" C-u 2>/dev/null; sleep 0.2
 tmux send-keys -t "$PANE" '/exit' Enter; sleep 1
 
 if [[ "$PANE_IDX" -eq 0 ]]; then
+  # 컨테이너 전체에 ANTHROPIC_API_KEY가 걸려 있으면 OAuth 로그인이 돼 있어도
+  # Remote-Control이 "API 키가 설정되어 있음" 에러를 낸다. env -u로 claude 프로세스에만
+  # 안 보이게 해서 unset하고(파인의 셸 자체에는 남겨둬야 아래 폴백이 API 키를 쓸 수 있다).
   tmux send-keys -t "$PANE" \
-    "cd /workspace && unset CLAUDECODE && HOME=$AGENT_HOME claude remote-control --name '팀장-진서' --spawn session --permission-mode default --verbose" Enter
+    "cd /workspace && unset CLAUDECODE && HOME=$AGENT_HOME env -u ANTHROPIC_API_KEY claude remote-control --name '팀장-진서' --spawn session --permission-mode default --verbose" Enter
 else
   claude_bin="$(command -v claude)"
   tmux send-keys -t "$PANE" \
@@ -99,4 +102,8 @@ tmux send-keys -t "$PANE" C-u 2>/dev/null; sleep 0.2
 # team-recover.sh가 이 exit code로 성공/실패를 판정하므로, 정확한 문구로 교체.
 # 입력창 힌트 'Try "..."'로 판정 — 파인이 작아 릴리스 노트 팝업 등이 뜨면 그 아래
 # 상태줄("for shortcuts")은 화면 밖으로 밀려날 수 있지만 입력창 자체는 항상 보인다.
-wait_for_pane "$PANE" 'Try "' 30
+# 단, 진서(pane 0)가 Remote Control 모드로 뜬 경우 'Try "...'는 절대 나오지 않고
+# "Code anywhere with the Claude mobile app" 문구로 준비 완료를 알린다.
+READY_PATTERN='Try "'
+[[ "$PANE_IDX" -eq 0 ]] && READY_PATTERN='Try "|Code anywhere with the Claude mobile app'
+wait_for_pane "$PANE" "$READY_PATTERN" 30

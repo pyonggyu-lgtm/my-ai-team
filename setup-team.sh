@@ -168,8 +168,11 @@ for pane in 0 1 2 3 4 5; do
     # 팀장(진서)만 서버 모드로 실행 — 모바일 등 외부에서 직접 접속 가능 (04-3장)
     # 주의: Remote-Control은 OAuth 로그인이 필요해 API 키만으로는 동작하지 않는다 (04-1장).
     # OAuth 미설정 환경이면 이 명령은 실패하며, 아래에서 일반 모드로 대체 실행해야 한다.
+    # 컨테이너 전체에 ANTHROPIC_API_KEY가 걸려 있으면 OAuth 로그인이 돼 있어도
+    # Remote-Control이 "API 키가 설정되어 있음" 에러를 낸다. env -u로 claude 프로세스에만
+    # 안 보이게 해서 unset하고(파인의 셸 자체에는 남겨둬야 아래 폴백이 API 키를 쓸 수 있다).
     tmux send-keys -t "$SESSION:0.0" \
-      "cd /workspace && unset CLAUDECODE && HOME=$AGENT_HOME claude remote-control --name '팀장-진서' --spawn session --permission-mode default --verbose" Enter
+      "cd /workspace && unset CLAUDECODE && HOME=$AGENT_HOME env -u ANTHROPIC_API_KEY claude remote-control --name '팀장-진서' --spawn session --permission-mode default --verbose" Enter
     wait_for_pane "$SESSION:0.0" "Syntax theme" 15 && {
       tmux send-keys -t "$SESSION:0.0" Enter; sleep 1
     }
@@ -196,7 +199,12 @@ for pane in 0 1 2 3 4 5; do
     start_claude_in_pane "$SESSION:0.$pane" "${MEMBER_MODELS[$pane]}" "$AGENT_HOME" || true
   fi
 
-  tmux capture-pane -t "$SESSION:0.$pane" -p 2>/dev/null | grep -q 'Try "' \
+  # 진서(pane 0)는 Remote Control 모드로 뜨면 일반 REPL의 'Try "..."' 힌트가 절대
+  # 나오지 않고 "Code anywhere with the Claude mobile app" 문구로 준비 완료를 알린다.
+  # (OAuth 미설정으로 일반 모드에 폴백한 경우엔 다른 파인과 동일하게 'Try "'로 판정된다.)
+  READY_PATTERN='Try "'
+  [ "$pane" -eq 0 ] && READY_PATTERN='Try "|Code anywhere with the Claude mobile app'
+  tmux capture-pane -t "$SESSION:0.$pane" -p 2>/dev/null | grep -qE "$READY_PATTERN" \
     && echo -e "${GREEN}✅ 준비 완료${NC}" \
     || echo -e "${RED}⚠️ 타임아웃 — 수동 확인 필요${NC}"
 done
