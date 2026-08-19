@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>오늘 뭐 먹지? 🍻</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="nickname-screen" class="screen">
+    <div class="card">
+      <h1>오늘 뭐 먹지? 🍻</h1>
+      <p class="subtitle">닉네임을 입력하고 친구들과 함께 식당을 골라보세요</p>
+      <input id="nickname-input" type="text" placeholder="닉네임 (예: 민수)" maxlength="20" />
+      <button id="nickname-submit">시작하기</button>
+    </div>
+  </div>
+
+  <div id="main-screen" class="screen hidden">
+    <header>
+      <h1>오늘 뭐 먹지? 🍻</h1>
+      <div class="me">
+        <span id="me-label"></span>
+        <button id="change-name" title="닉네임 변경">변경</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="wheel-section">
+        <div class="wheel-wrap">
+          <canvas id="wheel" width="320" height="320"></canvas>
+          <div class="pointer">▼</div>
+        </div>
+        <button id="spin-btn" class="spin-btn">룰렛 돌리기 🎲</button>
+        <div id="result-banner" class="result-banner hidden"></div>
+      </section>
+
+      <section class="add-section">
+        <h2>식당 추가하기</h2>
+        <form id="add-form">
+          <input id="restaurant-input" type="text" placeholder="식당 이름을 입력하세요" maxlength="40" required />
+          <button type="submit">저장</button>
+        </form>
+      </section>
+
+      <section class="list-section">
+        <h2>오늘의 후보 <span id="count-badge">0</span></h2>
+        <ul id="restaurant-list"></ul>
+        <p id="empty-hint" class="empty-hint hidden">아직 등록된 식당이 없어요. 친구들과 함께 추가해보세요!</p>
+      </section>
+    </main>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

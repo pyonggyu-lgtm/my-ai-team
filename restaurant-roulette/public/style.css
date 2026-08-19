@@ -1,0 +1,254 @@
+:root {
+  --bg: #1b1023;
+  --bg-soft: #241631;
+  --card: #2c1b3d;
+  --accent: #ff7a59;
+  --accent-2: #ffd166;
+  --text: #f5eefa;
+  --text-dim: #b9a7c9;
+  --danger: #ff5c7a;
+  --radius: 16px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  background: radial-gradient(circle at top, #33204a, var(--bg));
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.screen {
+  min-height: 100vh;
+}
+
+#nickname-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 32px 24px;
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+h1 {
+  font-size: 1.5rem;
+  margin: 0 0 8px;
+}
+
+.subtitle {
+  color: var(--text-dim);
+  margin: 0 0 24px;
+  font-size: 0.9rem;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--bg-soft);
+  color: var(--text);
+  font-size: 1rem;
+  margin-bottom: 12px;
+}
+
+input[type="text"]:focus {
+  outline: 2px solid var(--accent);
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+#nickname-submit,
+#add-form button {
+  width: 100%;
+  padding: 14px;
+  background: var(--accent);
+  color: #1b1023;
+}
+
+#main-screen main {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 16px 48px;
+}
+
+header {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 20px 16px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+header h1 {
+  font-size: 1.25rem;
+}
+
+.me {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.me button {
+  background: transparent;
+  color: var(--accent-2);
+  border: 1px solid rgba(255, 209, 102, 0.4);
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  border-radius: 8px;
+}
+
+section {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-top: 16px;
+}
+
+section h2 {
+  margin: 0 0 16px;
+  font-size: 1.05rem;
+}
+
+.wheel-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.wheel-wrap {
+  position: relative;
+  width: 320px;
+  max-width: 100%;
+}
+
+#wheel {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 50%;
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.5));
+}
+
+.pointer {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.6rem;
+  color: var(--accent-2);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.spin-btn {
+  margin-top: 20px;
+  padding: 14px 32px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #1b1023;
+  font-size: 1.05rem;
+  border-radius: 999px;
+}
+
+.spin-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.result-banner {
+  margin-top: 16px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: rgba(255, 122, 89, 0.15);
+  border: 1px solid rgba(255, 122, 89, 0.4);
+  text-align: center;
+  width: 100%;
+}
+
+.result-banner strong {
+  font-size: 1.15rem;
+  color: var(--accent-2);
+}
+
+.add-section form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#restaurant-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#restaurant-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-soft);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+#restaurant-list .name {
+  font-weight: 600;
+}
+
+#restaurant-list .owner {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin-left: 8px;
+}
+
+#restaurant-list .delete-btn {
+  background: transparent;
+  color: var(--danger);
+  font-size: 0.8rem;
+  padding: 4px 8px;
+}
+
+#count-badge {
+  display: inline-block;
+  background: var(--accent);
+  color: #1b1023;
+  border-radius: 999px;
+  padding: 1px 10px;
+  font-size: 0.85rem;
+  vertical-align: middle;
+}
+
+.empty-hint {
+  color: var(--text-dim);
+  text-align: center;
+  font-size: 0.9rem;
+}

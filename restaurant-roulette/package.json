@@ -1,0 +1,14 @@
+{
+  "name": "restaurant-roulette",
+  "version": "1.0.0",
+  "private": true,
+  "description": "친구들과 함께 오늘 갈 식당을 룰렛으로 정하는 앱",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.5"
+  }
+}
