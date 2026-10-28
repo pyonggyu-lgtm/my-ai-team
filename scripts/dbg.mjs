@@ -1,0 +1,13 @@
+import { chromium } from 'playwright-core';
+const EXE='/home/claude/agents/minjun/.cache/ms-playwright/chromium-1228/chrome-linux64/chrome';
+const b=await chromium.launch({executablePath:EXE,args:['--no-sandbox','--disable-dev-shm-usage','--disable-gpu']});
+const p=await b.newPage({viewport:{width:1440,height:900}});
+const errs=[];
+p.on('console',m=>{if(m.type()==='error')errs.push(m.text().slice(0,200));});
+p.on('pageerror',e=>errs.push('PAGEERROR: '+String(e).slice(0,200)));
+await p.goto('http://localhost:3000/memories',{waitUntil:'load'});
+await p.waitForTimeout(5000);
+const r=await p.evaluate(()=>({mainLen:(document.querySelector('main')?.innerText||'').length, h1:document.querySelector('h1')?.textContent||null}));
+console.log('main:',JSON.stringify(r));
+console.log('errors:',errs.length?errs.join('\n'):'none');
+await b.close();
