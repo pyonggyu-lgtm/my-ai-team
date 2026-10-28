@@ -1,0 +1,120 @@
+{
+  "nav": {
+    "links": [
+      {
+        "label": "홈",
+        "linkW": 215,
+        "color": "rgb(28, 127, 184)",
+        "fontSize": "14px",
+        "display": "flex",
+        "opacity": "1",
+        "visibility": "visible",
+        "spanExists": false
+      },
+      {
+        "label": "독백",
+        "linkW": 215,
+        "color": "rgba(12, 45, 72, 0.7)",
+        "fontSize": "14px",
+        "display": "flex",
+        "opacity": "1",
+        "visibility": "visible",
+        "spanExists": false
+      },
+      {
+        "label": "편지",
+        "linkW": 215,
+        "color": "rgba(12, 45, 72, 0.7)",
+        "fontSize": "14px",
+        "display": "flex",
+        "opacity": "1",
+        "visibility": "visible",
+        "spanExists": false
+      },
+      {
+        "label": "자산",
+        "linkW": 215,
+        "color": "rgba(12, 45, 72, 0.7)",
+        "fontSize": "14px",
+        "display": "flex",
+        "opacity": "1",
+        "visibility": "visible",
+        "spanExists": false
+      },
+      {
+        "label": "관계",
+        "linkW": 215,
+        "color": "rgba(12, 45, 72, 0.7)",
+        "fontSize": "14px",
+        "display": "flex",
+        "opacity": "1",
+        "visibility": "visible",
+        "spanExists": false
+      },
+      {
+        "label": "추억",
+        "linkW": 215,
+        "color": "rgba(12, 45, 72, 0.7)",
+        "fontSize": "14px",
+        "display": "flex",
+        "opacity": "1",
+        "visibility": "visible",
+        "spanExists": false
+      },
+      {
+        "label": "타임캡슐",
+        "linkW": 215,
+        "color": "rgba(12, 45, 72, 0.7)",
+        "fontSize": "14px",
+        "display": "flex",
+        "opacity": "1",
+        "visibility": "visible",
+        "spanExists": false
+      },
+      {
+        "label": "타임라인",
+        "linkW": 215,
+        "color": "rgba(12, 45, 72, 0.7)",
+        "fontSize": "14px",
+        "display": "flex",
+        "opacity": "1",
+        "visibility": "visible",
+        "spanExists": false
+      },
+      {
+        "label": "버킷리스트",
+        "linkW": 215,
+        "color": "rgba(12, 45, 72, 0.7)",
+        "fontSize": "14px",
+        "display": "flex",
+        "opacity": "1",
+        "visibility": "visible",
+        "spanExists": false
+      },
+      {
+        "label": "설정",
+        "linkW": 215,
+        "color": "rgba(12, 45, 72, 0.7)",
+        "fontSize": "14px",
+        "display": "flex",
+        "opacity": "1",
+        "visibility": "visible",
+        "spanExists": false
+      }
+    ],
+    "appBg": {
+      "opacity": "1",
+      "background": "url(\"https://digital-memoir-chi.vercel.app/beach.jpg\")",
+      "position": "fixed",
+      "filter": "none",
+      "zIndex": "-1"
+    },
+    "asideWidth": 240
+  },
+  "/monologue": {
+    "error": "Error: page.waitForTimeout: Target page, context or browser has been closed"
+  },
+  "/settings": {
+    "error": "Error: browser.newPage: Target page, context or browser has been closed"
+  }
+}

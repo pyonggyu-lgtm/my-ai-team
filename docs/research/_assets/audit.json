@@ -1,0 +1,557 @@
+{
+  "url": "https://digital-memoir-chi.vercel.app",
+  "capturedAt": "2026-07-19T12:16:30.235Z",
+  "viewports": {
+    "desktop": {
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "docHeight": 900,
+      "overflowX": false,
+      "wideCount": 0,
+      "wideExamples": [],
+      "smallTargets": {
+        "total": 17,
+        "smallCount": 11,
+        "examples": [
+          {
+            "tag": "a",
+            "text": "홈",
+            "w": 215,
+            "h": 36
+          },
+          {
+            "tag": "a",
+            "text": "독백",
+            "w": 215,
+            "h": 36
+          },
+          {
+            "tag": "a",
+            "text": "편지",
+            "w": 215,
+            "h": 36
+          },
+          {
+            "tag": "a",
+            "text": "자산",
+            "w": 215,
+            "h": 36
+          },
+          {
+            "tag": "a",
+            "text": "관계",
+            "w": 215,
+            "h": 36
+          },
+          {
+            "tag": "a",
+            "text": "추억",
+            "w": 215,
+            "h": 36
+          },
+          {
+            "tag": "a",
+            "text": "타임캡슐",
+            "w": 215,
+            "h": 36
+          },
+          {
+            "tag": "a",
+            "text": "타임라인",
+            "w": 215,
+            "h": 36
+          },
+          {
+            "tag": "a",
+            "text": "버킷리스트",
+            "w": 215,
+            "h": 36
+          },
+          {
+            "tag": "a",
+            "text": "설정",
+            "w": 215,
+            "h": 36
+          },
+          {
+            "tag": "a",
+            "text": "설정",
+            "w": 34,
+            "h": 18
+          }
+        ]
+      }
+    },
+    "tablet": {
+      "scrollWidth": 768,
+      "innerWidth": 768,
+      "docHeight": 1024,
+      "overflowX": false,
+      "wideCount": 0,
+      "wideExamples": [],
+      "smallTargets": {
+        "total": 17,
+        "smallCount": 11,
+        "examples": [
+          {
+            "tag": "a",
+            "text": "홈",
+            "w": 215,
+            "h": 36
+          },
+          {
+            "tag": "a",
+            "text": "독백",
+            "w": 215,
+            "h": 36
+          },
+          {
+            "tag": "a",
+            "text": "편지",
+            "w": 215,
+            "h": 36
+          },
+          {
+            "tag": "a",
+            "text": "자산",
+            "w": 215,
+            "h": 36
+          },
+          {
+            "tag": "a",
+            "text": "관계",
+            "w": 215,
+            "h": 36
+          },
+          {
+            "tag": "a",
+            "text": "추억",
+            "w": 215,
+            "h": 36
+          },
+          {
+            "tag": "a",
+            "text": "타임캡슐",
+            "w": 215,
+            "h": 36
+          },
+          {
+            "tag": "a",
+            "text": "타임라인",
+            "w": 215,
+            "h": 36
+          },
+          {
+            "tag": "a",
+            "text": "버킷리스트",
+            "w": 215,
+            "h": 36
+          },
+          {
+            "tag": "a",
+            "text": "설정",
+            "w": 215,
+            "h": 36
+          },
+          {
+            "tag": "a",
+            "text": "설정",
+            "w": 34,
+            "h": 18
+          }
+        ]
+      }
+    },
+    "mobile": {
+      "scrollWidth": 375,
+      "innerWidth": 375,
+      "docHeight": 812,
+      "overflowX": false,
+      "wideCount": 0,
+      "wideExamples": [],
+      "smallTargets": {
+        "total": 17,
+        "smallCount": 1,
+        "examples": [
+          {
+            "tag": "a",
+            "text": "설정",
+            "w": 34,
+            "h": 18
+          }
+        ]
+      }
+    }
+  },
+  "httpStatus": 200,
+  "loadMs": 1206,
+  "perf": {
+    "domContentLoaded": 400,
+    "loadEvent": 460,
+    "transferBytesByType": {
+      "link": 7493,
+      "script": 341446,
+      "css": 442033,
+      "other": 4307,
+      "fetch": 16892
+    },
+    "transferBytesTotal": 812171,
+    "resourceCount": 33,
+    "paints": [
+      {
+        "name": "first-paint",
+        "t": 440
+      },
+      {
+        "name": "first-contentful-paint",
+        "t": 440
+      }
+    ],
+    "largest": [
+      {
+        "name": "https://digital-memoir-chi.vercel.app/beach.jpg",
+        "type": "css",
+        "size": 442033,
+        "dur": 67
+      },
+      {
+        "name": "https://digital-memoir-chi.vercel.app/_next/static/chunks/24-3a913c57c489595e.js",
+        "type": "script",
+        "size": 106700,
+        "dur": 55
+      },
+      {
+        "name": "https://digital-memoir-chi.vercel.app/_next/static/chunks/fd9d1056-f38b5742f29f8db8.js",
+        "type": "script",
+        "size": 55319,
+        "dur": 53
+      },
+      {
+        "name": "https://digital-memoir-chi.vercel.app/_next/static/chunks/437-39c6aba14fd3ecae.js",
+        "type": "script",
+        "size": 39969,
+        "dur": 33
+      },
+      {
+        "name": "https://digital-memoir-chi.vercel.app/_next/static/chunks/117-a456c57b686302bd.js",
+        "type": "script",
+        "size": 33347,
+        "dur": 83
+      },
+      {
+        "name": "https://digital-memoir-chi.vercel.app/_next/static/chunks/519-ea142edcfcd93719.js",
+        "type": "script",
+        "size": 11259,
+        "dur": 29
+      },
+      {
+        "name": "https://digital-memoir-chi.vercel.app/_next/static/chunks/648-d33f421518819e71.js",
+        "type": "script",
+        "size": 9480,
+        "dur": 98
+      },
+      {
+        "name": "https://digital-memoir-chi.vercel.app/_next/static/chunks/app/network/page-120f87dc58491a13.js",
+        "type": "script",
+        "size": 8693,
+        "dur": 44
+      },
+      {
+        "name": "https://digital-memoir-chi.vercel.app/_next/static/chunks/176-c143a30d773f98fc.js",
+        "type": "script",
+        "size": 8615,
+        "dur": 41
+      },
+      {
+        "name": "https://digital-memoir-chi.vercel.app/_next/static/chunks/app/bucket-list/page-85dcbfaba45ac59f.js",
+        "type": "script",
+        "size": 8162,
+        "dur": 24
+      },
+      {
+        "name": "https://digital-memoir-chi.vercel.app/_next/static/chunks/app/life-timeline/page-3df370ee65eb6d6d.js",
+        "type": "script",
+        "size": 7706,
+        "dur": 28
+      },
+      {
+        "name": "https://digital-memoir-chi.vercel.app/_next/static/chunks/716-cd3590153124e876.js",
+        "type": "script",
+        "size": 6991,
+        "dur": 31
+      }
+    ]
+  },
+  "head": {
+    "title": "내 인생의 기록 · Digital Memoir",
+    "lang": "ko",
+    "viewport": "width=device-width, initial-scale=1",
+    "description": "100세까지 의미있는 삶을 기록하고 돌아보는 개인 디지털 자서전",
+    "charset": "UTF-8",
+    "favicon": false
+  },
+  "structure": {
+    "headingCount": 0,
+    "headings": [],
+    "landmarks": [
+      {
+        "tag": "aside",
+        "role": null,
+        "label": null
+      },
+      {
+        "tag": "nav",
+        "role": null,
+        "label": null
+      },
+      {
+        "tag": "main",
+        "role": null,
+        "label": null
+      },
+      {
+        "tag": "nav",
+        "role": null,
+        "label": null
+      }
+    ],
+    "buttonCount": 17,
+    "buttons": [
+      {
+        "tag": "a",
+        "text": "내 인생의 기록Digital Memoir",
+        "href": "/",
+        "hasLabel": true
+      },
+      {
+        "tag": "a",
+        "text": "홈",
+        "href": "/",
+        "hasLabel": true
+      },
+      {
+        "tag": "a",
+        "text": "독백",
+        "href": "/monologue",
+        "hasLabel": true
+      },
+      {
+        "tag": "a",
+        "text": "편지",
+        "href": "/letters",
+        "hasLabel": true
+      },
+      {
+        "tag": "a",
+        "text": "자산",
+        "href": "/assets",
+        "hasLabel": true
+      },
+      {
+        "tag": "a",
+        "text": "관계",
+        "href": "/network",
+        "hasLabel": true
+      },
+      {
+        "tag": "a",
+        "text": "추억",
+        "href": "/memories",
+        "hasLabel": true
+      },
+      {
+        "tag": "a",
+        "text": "타임캡슐",
+        "href": "/time-capsule",
+        "hasLabel": true
+      },
+      {
+        "tag": "a",
+        "text": "타임라인",
+        "href": "/life-timeline",
+        "hasLabel": true
+      },
+      {
+        "tag": "a",
+        "text": "버킷리스트",
+        "href": "/bucket-list",
+        "hasLabel": true
+      },
+      {
+        "tag": "a",
+        "text": "설정",
+        "href": "/settings",
+        "hasLabel": true
+      },
+      {
+        "tag": "a",
+        "text": "설정",
+        "href": "/settings",
+        "hasLabel": true
+      },
+      {
+        "tag": "a",
+        "text": "홈",
+        "href": "/",
+        "hasLabel": true
+      },
+      {
+        "tag": "a",
+        "text": "독백",
+        "href": "/monologue",
+        "hasLabel": true
+      },
+      {
+        "tag": "a",
+        "text": "자산",
+        "href": "/assets",
+        "hasLabel": true
+      },
+      {
+        "tag": "a",
+        "text": "추억",
+        "href": "/memories",
+        "hasLabel": true
+      },
+      {
+        "tag": "button",
+        "text": "메뉴",
+        "href": null,
+        "hasLabel": true
+      }
+    ],
+    "imgCount": 0,
+    "imgs": [],
+    "inputs": []
+  },
+  "styles": {
+    "bodyFont": "Pretendard, Lora, system-ui, sans-serif",
+    "bodyBg": "rgba(0, 0, 0, 0)",
+    "bodyColor": "rgb(12, 45, 72)",
+    "bodyFontSize": "16px",
+    "bodyLineHeight": "24px",
+    "h1": null,
+    "h2": null,
+    "p": {
+      "fontSize": "18px",
+      "lineHeight": "28px",
+      "fontFamily": "Lora, Pretendard, Georgia, serif",
+      "fontWeight": "700",
+      "color": "rgb(28, 127, 184)",
+      "letterSpacing": "normal"
+    },
+    "button": {
+      "fontSize": "16px",
+      "lineHeight": "24px",
+      "fontFamily": "Pretendard, Lora, system-ui, sans-serif",
+      "fontWeight": "400",
+      "color": "rgb(12, 45, 72)",
+      "letterSpacing": "normal"
+    },
+    "topTextColors": [
+      [
+        "rgba(12, 45, 72, 0.7)",
+        48
+      ],
+      [
+        "rgb(12, 45, 72)",
+        20
+      ],
+      [
+        "rgba(12, 45, 72, 0.5)",
+        19
+      ],
+      [
+        "rgb(0, 0, 0)",
+        14
+      ],
+      [
+        "rgb(28, 127, 184)",
+        9
+      ],
+      [
+        "rgb(255, 255, 255)",
+        2
+      ],
+      [
+        "rgba(255, 255, 255, 0.9)",
+        1
+      ]
+    ],
+    "topBgColors": [
+      [
+        "rgba(248, 252, 254, 0.6)",
+        1
+      ],
+      [
+        "rgba(28, 127, 184, 0.15)",
+        1
+      ],
+      [
+        "rgb(248, 252, 254)",
+        1
+      ]
+    ],
+    "topFonts": [
+      [
+        "Pretendard",
+        112
+      ],
+      [
+        "Lora",
+        1
+      ]
+    ],
+    "topFontSizes": [
+      [
+        "16px",
+        7
+      ],
+      [
+        "18px",
+        2
+      ],
+      [
+        "12px",
+        1
+      ],
+      [
+        "30px",
+        1
+      ]
+    ]
+  },
+  "contrast": {
+    "checked": 4,
+    "failCount": 3,
+    "examples": [
+      {
+        "text": "내 인생의 기록",
+        "ratio": 4.26,
+        "need": 4.5,
+        "fontSize": "18px",
+        "color": "rgb(28, 127, 184)"
+      },
+      {
+        "text": "내 인생의 기록",
+        "ratio": 1,
+        "need": 3,
+        "fontSize": "30px",
+        "color": "rgb(255, 255, 255)"
+      },
+      {
+        "text": "설정",
+        "ratio": 1,
+        "need": 4.5,
+        "fontSize": "18px",
+        "color": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  "console": [
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    }
+  ]
+}
