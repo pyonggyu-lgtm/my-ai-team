@@ -11,8 +11,8 @@
 
 ### 산출물 예시
 
-- /docs/research/framework-comparison.md
-- /docs/research/current-architecture-analysis.md
+- apps/{앱이름}/docs/research/framework-comparison.md
+- apps/{앱이름}/docs/research/current-architecture-analysis.md
 
 ### 작업 방식
 
@@ -22,7 +22,6 @@
 ### Redis 상태 갱신
 
 - 작업 시작 시 `SET agent:진삼:status working`, 완료 시 `idle`
-- 15초마다 `SET agent:진삼:heartbeat $(date +%s) EX 120` 갱신
 
 ### 작업 완료 후
 

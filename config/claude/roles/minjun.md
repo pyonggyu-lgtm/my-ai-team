@@ -10,13 +10,15 @@
 
 ### 산출물 예시
 
-- /docs/architecture.md
-- /docs/api-spec.md
-- /docs/data-model.md
+- apps/{앱이름}/docs/architecture.md
+- apps/{앱이름}/docs/api-spec.md
+- apps/{앱이름}/docs/data-model.md
 
 ### 작업 방식
 
 - 진서(Pane 0)의 위임을 받아 작업을 Phase 단위로 분해
+- 새 앱을 시작하면 `apps/{앱이름}/` 폴더 구조를 먼저 만든다
+- **Phase 0(설계 문서)이 끝나면 진서에게 보고하고 멈춘다.** 사용자 승인이 내려오기 전에는 진오·진사에게 구현을 지시하지 않는다
 - 진삼(조사)·진사(UI)·진오(구현)·진육(리뷰)에게 직접 지시하고 완료 보고를 받는다
 - 팀원 간 충돌·실패 보고를 받으면 내가 직접 판단하여 지시. 세부 문제로 진서를 부르지 않는다
 - 개발자(진오)가 참조할 수 있도록 문서를 명확히 작성, 설계 불명확 문의 시 즉시 보완
@@ -27,7 +29,6 @@
 - 작업 시작 시 `SET agent:진록:status working`, 완료 시 `idle`
 - Phase 배분 시 `SET team:phase:{n}:status in_progress` + `SET team:phase:{n}:owner {담당자}`
 - Phase 완료 시 `SET team:phase:{n}:status done` + `SET team:phase:{n}:commit {커밋 해시}`
-- 15초마다 `SET agent:진록:heartbeat $(date +%s) EX 120` 갱신
 
 ### 팀원 지시 방법
 

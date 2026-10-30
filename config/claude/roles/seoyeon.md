@@ -19,7 +19,6 @@
 
 - 작업 시작 시 `SET agent:진오:status working`, 완료 시 `idle`
 - 파일 수정 전 `SET lock:file:{경로} 진오 EX 3600 NX`로 락 획득, 작업 종료 시 `DEL`
-- 15초마다 `SET agent:진오:heartbeat $(date +%s) EX 120` 갱신
 - 구현 완료 시 `LPUSH queue:review {파일 경로}`로 진육에게 리뷰 요청 등록
 
 ### 작업 완료 후

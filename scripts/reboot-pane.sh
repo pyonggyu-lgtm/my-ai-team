@@ -10,7 +10,7 @@ if [[ -z "$PANE_IDX" ]]; then
   exit 1
 fi
 
-MODELS=("claude-opus-5-5" "claude-opus-5-5" "claude-sonnet-5-5" "claude-sonnet-5-5" "claude-sonnet-5-5" "claude-sonnet-5-5")
+MODELS=("claude-sonnet-5-5" "claude-opus-5-5" "claude-sonnet-5-5" "claude-sonnet-5-5" "claude-sonnet-5-5" "claude-opus-5-5")
 HOMES=("jun" "minjun" "jihun" "sua" "seoyeon" "taeyang") # config/claude/roles/*.md 파일명과 일치
 MODEL="${MODELS[$PANE_IDX]}"
 AGENT_HOME="/home/claude/agents/${HOMES[$PANE_IDX]}"
@@ -28,6 +28,8 @@ wait_for_pane() {
 mkdir -p "$AGENT_HOME/.claude"
 cat /workspace/config/claude/CLAUDE.md "/workspace/config/claude/roles/${HOMES[$PANE_IDX]}.md" \
   > "$AGENT_HOME/.claude/CLAUDE.md"
+# 금지 목록(deny)이 실제로 적용되도록 사용자 설정 자리에 복사
+cp /workspace/config/claude/settings.json "$AGENT_HOME/.claude/settings.json"
 
 PANE="${SESSION}:0.${PANE_IDX}"
 # Ctrl+C는 Claude Code가 대기(idle) 상태일 때는 무시된다(생성 중일 때만 취소 동작) —

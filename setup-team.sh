@@ -28,6 +28,8 @@ setup_agent_home() {
   mkdir -p "$home/.claude"
   cat /workspace/config/claude/CLAUDE.md /workspace/config/claude/roles/"$name".md \
     > "$home/.claude/CLAUDE.md"
+  # 금지 목록(deny)이 실제로 적용되도록 각자의 사용자 설정 자리에 복사
+  cp /workspace/config/claude/settings.json "$home/.claude/settings.json"
 }
 
 # ── 유틸: Claude 실행 + 다이얼로그 자동 처리 ────────────────
@@ -155,12 +157,12 @@ echo -e "\n${YELLOW}[3/4] Claude 실행 중... (파인당 최대 1분)${NC}"
 MEMBER_NAMES=("진서" "진록" "진삼" "진사" "진오" "진육")
 MEMBER_HOMES=("jun" "minjun" "jihun" "sua" "seoyeon" "taeyang") # config/claude/roles/*.md 파일명과 일치
 MEMBER_MODELS=(
-  "claude-opus-5-5"   # 진서 (팀장 — 판단·조율 중심)
+  "claude-sonnet-5-5" # 진서 (팀장 — 전달·보고 중심)
   "claude-opus-5-5"   # 진록 (PM — 설계·추론 중심)
   "claude-sonnet-5-5" # 진삼
   "claude-sonnet-5-5" # 진사
   "claude-sonnet-5-5" # 진오
-  "claude-sonnet-5-5" # 진육
+  "claude-opus-5-5"   # 진육 (마지막 검사 — 깊은 검토)
 )
 
 echo "  파인별 역할 CLAUDE.md 구성 중..."

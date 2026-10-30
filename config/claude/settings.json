@@ -17,7 +17,25 @@
       "Bash(cat*credentials*)",
       "Bash(cat*.env*)",
       "Bash(echo*KEY*)",
-      "Bash(echo*TOKEN*)"
+      "Bash(echo*TOKEN*)",
+      "Bash(git push*)",
+      "Bash(git clean*)",
+      "Bash(aws *)",
+      "Bash(amplify *)",
+      "Bash(vercel *)",
+      "Bash(npm publish*)",
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(**/*credentials*)",
+      "Read(**/*secret*)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Edit(//workspace/config/claude/**)",
+      "Edit(//workspace/.claude/**)",
+      "Edit(//workspace/setup-team.sh)",
+      "Edit(//workspace/scripts/reboot-pane.sh)",
+      "Edit(//home/claude/agents/**/.claude/settings.json)",
+      "mcp__filesystem"
     ]
   }
 }
