@@ -22,10 +22,10 @@ wait_for_pane() {
 }
 
 # $1: 파인 주소 (예: team:0.2)
-# $2: 모델 (기본값: claude-sonnet-4-6)
+# $2: 모델 (기본값: claude-sonnet-5-5)
 start_claude_in_pane() {
   local pane="$1"
-  local model="${2:-claude-sonnet-4-6}"
+  local model="${2:-claude-sonnet-5-5}"
   local claude_bin
   claude_bin="$(command -v claude)"
 
@@ -61,12 +61,12 @@ start_claude_in_pane() {
 # 파인별 이름과 모델 배열
 MEMBER_NAMES=("쭌" "민준" "지훈" "수아" "서연" "태양")
 MEMBER_MODELS=(
-  "claude-sonnet-4-6" # 0: 쭌
-  "claude-opus-4-8"   # 1: 민준 (복잡한 설계 → Opus)
-  "claude-sonnet-4-6" # 2: 지훈
-  "claude-sonnet-4-6" # 3: 수아
-  "claude-sonnet-4-6" # 4: 서연
-  "claude-sonnet-4-6" # 5: 태양
+  "claude-sonnet-5-5" # 0: 쭌
+  "claude-opus-5-5"   # 1: 민준 (복잡한 설계 → Opus)
+  "claude-sonnet-5-5" # 2: 지훈
+  "claude-sonnet-5-5" # 3: 수아
+  "claude-sonnet-5-5" # 4: 서연
+  "claude-sonnet-5-5" # 5: 태양
 )
 
 for pane in 0 1 2 3 4 5; do

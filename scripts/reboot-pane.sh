@@ -10,7 +10,7 @@ if [[ -z "$PANE_IDX" ]]; then
   exit 1
 fi
 
-MODELS=("claude-opus-4-8" "claude-opus-4-8" "claude-sonnet-4-6" "claude-sonnet-4-6" "claude-sonnet-4-6" "claude-sonnet-4-6")
+MODELS=("claude-opus-5-5" "claude-opus-5-5" "claude-sonnet-5-5" "claude-sonnet-5-5" "claude-sonnet-5-5" "claude-sonnet-5-5")
 HOMES=("jun" "minjun" "jihun" "sua" "seoyeon" "taeyang") # config/claude/roles/*.md 파일명과 일치
 MODEL="${MODELS[$PANE_IDX]}"
 AGENT_HOME="/home/claude/agents/${HOMES[$PANE_IDX]}"

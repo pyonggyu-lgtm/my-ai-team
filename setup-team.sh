@@ -33,7 +33,7 @@ setup_agent_home() {
 # ── 유틸: Claude 실행 + 다이얼로그 자동 처리 ────────────────
 # $3: 에이전트 HOME 디렉터리 (파인별로 다른 역할을 로드하기 위함)
 start_claude_in_pane() {
-  local pane="$1" model="${2:-claude-sonnet-4-6}" agent_home="$3"
+  local pane="$1" model="${2:-claude-sonnet-5-5}" agent_home="$3"
   local claude_bin; claude_bin="$(command -v claude)"
 
   tmux send-keys -t "$pane" C-c 2>/dev/null; sleep 0.3
@@ -155,12 +155,12 @@ echo -e "\n${YELLOW}[3/4] Claude 실행 중... (파인당 최대 1분)${NC}"
 MEMBER_NAMES=("진서" "진록" "진삼" "진사" "진오" "진육")
 MEMBER_HOMES=("jun" "minjun" "jihun" "sua" "seoyeon" "taeyang") # config/claude/roles/*.md 파일명과 일치
 MEMBER_MODELS=(
-  "claude-opus-4-8"   # 진서 (팀장 — 판단·조율 중심)
-  "claude-opus-4-8"   # 진록 (PM — 설계·추론 중심)
-  "claude-sonnet-4-6" # 진삼
-  "claude-sonnet-4-6" # 진사
-  "claude-sonnet-4-6" # 진오
-  "claude-sonnet-4-6" # 진육
+  "claude-opus-5-5"   # 진서 (팀장 — 판단·조율 중심)
+  "claude-opus-5-5"   # 진록 (PM — 설계·추론 중심)
+  "claude-sonnet-5-5" # 진삼
+  "claude-sonnet-5-5" # 진사
+  "claude-sonnet-5-5" # 진오
+  "claude-sonnet-5-5" # 진육
 )
 
 echo "  파인별 역할 CLAUDE.md 구성 중..."
