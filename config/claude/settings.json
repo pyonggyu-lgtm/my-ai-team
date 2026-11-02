@@ -35,7 +35,14 @@
       "Edit(//workspace/setup-team.sh)",
       "Edit(//workspace/scripts/reboot-pane.sh)",
       "Edit(//home/claude/agents/**/.claude/settings.json)",
-      "mcp__filesystem"
+      "mcp__filesystem",
+      "Read(//home/claude/.secrets/**)",
+      "Bash(*.secrets*)",
+      "Bash(*pro-token*)",
+      "Bash(printenv*)",
+      "Edit(//workspace/scripts/claude-pro.sh)",
+      "Edit(//workspace/scripts/pro-token-setup.sh)",
+      "Edit(//workspace/scripts/gemini-ask.sh)"
     ]
   }
 }

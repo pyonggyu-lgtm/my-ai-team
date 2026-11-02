@@ -15,6 +15,25 @@ HOMES=("jun" "minjun" "jihun" "sua" "seoyeon" "taeyang") # config/claude/roles/*
 MODEL="${MODELS[$PANE_IDX]}"
 AGENT_HOME="/home/claude/agents/${HOMES[$PANE_IDX]}"
 
+# ── 인증 방식 (2026-11-02 추가) ─────────────────────────────
+# pro : Claude Pro 구독 토큰으로 실행 (기본값, 추가 요금 없음 / Pro 한도 사용)
+# api : 컨테이너의 ANTHROPIC_API_KEY로 실행 (비상용, Console 크레딧 차감)
+#   사용 예) bash setup-team.sh                 → Pro
+#            FACTORY_AUTH=api bash setup-team.sh → API 키
+# 토큰 등록: bash scripts/pro-token-setup.sh  (1년짜리, 파일: /home/claude/.secrets/pro-token.secret)
+PRO_TOKEN_FILE="/home/claude/.secrets/pro-token.secret"
+AUTH_MODE="${FACTORY_AUTH:-pro}"
+if [ "$AUTH_MODE" = "pro" ] && [ ! -s "$PRO_TOKEN_FILE" ]; then
+  echo "⚠️  Pro 토큰이 아직 없어 API 키 모드로 실행합니다. (등록: bash scripts/pro-token-setup.sh)"
+  AUTH_MODE="api"
+fi
+if [ "$AUTH_MODE" = "pro" ]; then
+  CLAUDE_LAUNCH="bash /workspace/scripts/claude-pro.sh"
+else
+  CLAUDE_LAUNCH="$(command -v claude)"
+fi
+
+
 wait_for_pane() {
   local pane="$1" pattern="$2" timeout="${3:-30}" waited=0
   while [ $waited -lt $timeout ]; do
@@ -48,7 +67,7 @@ if [[ "$PANE_IDX" -eq 0 ]]; then
   tmux send-keys -t "$PANE" \
     "cd /workspace && unset CLAUDECODE && HOME=$AGENT_HOME env -u ANTHROPIC_API_KEY claude remote-control --name '팀장-진서' --spawn session --permission-mode default --verbose" Enter
 else
-  claude_bin="$(command -v claude)"
+  claude_bin="$CLAUDE_LAUNCH"
   tmux send-keys -t "$PANE" \
     "cd /workspace && unset CLAUDECODE && HOME=$AGENT_HOME $claude_bin --model $MODEL --dangerously-skip-permissions" Enter
 fi
@@ -58,10 +77,12 @@ wait_for_pane "$PANE" "Syntax theme" 15 && {
   tmux send-keys -t "$PANE" Enter; sleep 1
 }
 # 다이얼로그 0.5: API 키 사용 확인 (기본값 No) → Up + Enter
-wait_for_pane "$PANE" "Do you want to use this API key" 15 && {
-  tmux send-keys -t "$PANE" Up; sleep 0.3
-  tmux send-keys -t "$PANE" Enter; sleep 1
-}
+if [ "$AUTH_MODE" = "api" ]; then
+  wait_for_pane "$PANE" "Do you want to use this API key" 15 && {
+    tmux send-keys -t "$PANE" Up; sleep 0.3
+    tmux send-keys -t "$PANE" Enter; sleep 1
+  }
+fi
 # 다이얼로그 0.7: 보안 안내 화면 → Enter
 wait_for_pane "$PANE" "Press Enter to continue" 15 && {
   tmux send-keys -t "$PANE" Enter; sleep 1
@@ -79,7 +100,7 @@ wait_for_pane "$PANE" "you accept all responsibility" 20 && {
 if [[ "$PANE_IDX" -eq 0 ]]; then
   # Remote-Control은 OAuth 없이 즉시 실패한다 — 그 경우 일반 모드로 대체 실행
   wait_for_pane "$PANE" "must be logged in" 5 && {
-    claude_bin="$(command -v claude)"
+    claude_bin="$CLAUDE_LAUNCH"
     tmux send-keys -t "$PANE" C-c 2>/dev/null; sleep 0.3
     tmux send-keys -t "$PANE" \
       "cd /workspace && unset CLAUDECODE && HOME=$AGENT_HOME $claude_bin --model $MODEL --dangerously-skip-permissions" Enter

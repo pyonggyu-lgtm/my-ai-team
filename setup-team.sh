@@ -11,6 +11,24 @@ NC='\033[0m'
 
 SESSION="team1"
 
+# ── 인증 방식 (2026-11-02 추가) ─────────────────────────────
+# pro : Claude Pro 구독 토큰으로 실행 (기본값, 추가 요금 없음 / Pro 한도 사용)
+# api : 컨테이너의 ANTHROPIC_API_KEY로 실행 (비상용, Console 크레딧 차감)
+#   사용 예) bash setup-team.sh                 → Pro
+#            FACTORY_AUTH=api bash setup-team.sh → API 키
+# 토큰 등록: bash scripts/pro-token-setup.sh  (1년짜리, 파일: /home/claude/.secrets/pro-token.secret)
+PRO_TOKEN_FILE="/home/claude/.secrets/pro-token.secret"
+AUTH_MODE="${FACTORY_AUTH:-pro}"
+if [ "$AUTH_MODE" = "pro" ] && [ ! -s "$PRO_TOKEN_FILE" ]; then
+  echo "⚠️  Pro 토큰이 아직 없어 API 키 모드로 실행합니다. (등록: bash scripts/pro-token-setup.sh)"
+  AUTH_MODE="api"
+fi
+if [ "$AUTH_MODE" = "pro" ]; then
+  CLAUDE_LAUNCH="bash /workspace/scripts/claude-pro.sh"
+else
+  CLAUDE_LAUNCH="$(command -v claude)"
+fi
+
 # ── 유틸: 파인에 패턴이 나타날 때까지 대기 ──────────────────
 wait_for_pane() {
   local pane="$1" pattern="$2" timeout="${3:-30}" waited=0
@@ -36,7 +54,7 @@ setup_agent_home() {
 # $3: 에이전트 HOME 디렉터리 (파인별로 다른 역할을 로드하기 위함)
 start_claude_in_pane() {
   local pane="$1" model="${2:-claude-sonnet-5-5}" agent_home="$3"
-  local claude_bin; claude_bin="$(command -v claude)"
+  local claude_bin="$CLAUDE_LAUNCH"
 
   tmux send-keys -t "$pane" C-c 2>/dev/null; sleep 0.3
   tmux send-keys -t "$pane" C-u 2>/dev/null; sleep 0.2
@@ -50,10 +68,12 @@ start_claude_in_pane() {
   }
 
   # 다이얼로그 0.5: API 키 사용 확인 (기본값 No) → Up + Enter
-  wait_for_pane "$pane" "Do you want to use this API key" 15 && {
-    tmux send-keys -t "$pane" Up; sleep 0.3
-    tmux send-keys -t "$pane" Enter; sleep 1
-  }
+  if [ "$AUTH_MODE" = "api" ]; then
+    wait_for_pane "$pane" "Do you want to use this API key" 15 && {
+      tmux send-keys -t "$pane" Up; sleep 0.3
+      tmux send-keys -t "$pane" Enter; sleep 1
+    }
+  fi
 
   # 다이얼로그 0.7: 보안 안내 화면 → Enter
   wait_for_pane "$pane" "Press Enter to continue" 15 && {
@@ -102,7 +122,7 @@ if [ ${#MISSING[@]} -gt 0 ]; then
   exit 1
 fi
 
-if [ -z "$ANTHROPIC_API_KEY" ]; then
+if [ "$AUTH_MODE" = "api" ] && [ -z "$ANTHROPIC_API_KEY" ]; then
   echo -e "${RED}❌ ANTHROPIC_API_KEY 환경변수가 없습니다.${NC}"
   echo "   docker run 시 -e ANTHROPIC_API_KEY=... 옵션을 확인하세요."
   exit 1
@@ -110,7 +130,7 @@ fi
 
 echo "  ✅ tmux $(tmux -V | awk '{print $2}')"
 echo "  ✅ claude $(claude --version 2>/dev/null | head -1)"
-echo "  ✅ API 키 주입 확인"
+echo "  ✅ 인증 방식: $AUTH_MODE  (pro=구독 / api=API 키)"
 
 # ── [1/4] 기존 세션 정리 ────────────────────────────────────
 echo -e "\n${YELLOW}[1/4] 기존 세션 초기화...${NC}"
