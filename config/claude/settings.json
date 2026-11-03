@@ -42,7 +42,8 @@
       "Bash(printenv*)",
       "Edit(//workspace/scripts/claude-pro.sh)",
       "Edit(//workspace/scripts/pro-token-setup.sh)",
-      "Edit(//workspace/scripts/gemini-ask.sh)"
+      "Edit(//workspace/scripts/gemini-ask.sh)",
+      "Edit(//workspace/scripts/gemini-review.sh)"
     ]
   }
 }
