@@ -1,0 +1,444 @@
+<!-- 원본 점심메뉴_룰렛.html 에서 내장 폰트(base64)만 뺀 사본. 코드 읽기용. 실행·화면 비교는 원본 파일로. -->
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>점심 메뉴 룰렛</title>
+<style>
+  @font-face { font-family:"Pretendard"; font-weight:500; font-style:normal; font-display:swap; src:url(data:font/woff2;base64,[폰트 데이터 생략]) format("woff2"); }
+  @font-face { font-family:"Pretendard"; font-weight:700; font-style:normal; font-display:swap; src:url(data:font/woff2;base64,[폰트 데이터 생략]) format("woff2"); }
+
+  :root {
+    --navy:#1B2A44; --navy-deep:#111c30; --line:#2c4166; --paper:#f3eee3; --paper-dim:#b4c4e2;
+    --stamp:#c0392b; --stamp-hover:#d24636; --stamp-soft:#f2b4a4;
+    --ease-out:cubic-bezier(.16,1,.3,1);
+  }
+  * { box-sizing:border-box; }
+  html { font-size:clamp(16px,1.1vw,28px); height:100%; }
+  body { height:100%; margin:0; background:var(--navy); color:var(--paper); font-family:"Pretendard","Malgun Gothic","Apple SD Gothic Neo",sans-serif; font-weight:500; display:grid; grid-template-columns:minmax(0,1fr) 19rem; overflow:hidden; }
+  ::selection { background:var(--stamp); color:#fff; }
+  :focus-visible { outline:3px solid var(--paper); outline-offset:3px; }
+  button { font:inherit; color:inherit; }
+
+  main { display:flex; flex-direction:column; align-items:center; padding:1.2rem 1rem 1rem; min-width:0; min-height:0; }
+  #today { height:2.4rem; margin-bottom:.7rem; display:flex; align-items:center; }
+  #today:not(:empty) { padding:0 1rem; border:2px solid var(--stamp-soft); border-radius:6px; color:var(--stamp-soft); font-size:1.25rem; font-weight:700; letter-spacing:.02em; }
+  #wheelWrap { flex:1 1 auto; min-height:0; width:100%; display:flex; align-items:center; justify-content:center; margin:.3rem 0; }
+  #wheel { height:100%; max-height:100%; max-width:100%; aspect-ratio:1; filter:drop-shadow(0 1rem 1.4rem rgba(0,0,0,.35)); }
+  #notice { height:1.6rem; font-size:1.15rem; color:var(--stamp-soft); }
+  #spin { font-size:1.9rem; font-weight:700; letter-spacing:.04em; padding:.55em 2.6em; margin:.5rem 0 .3rem; border:0; border-radius:12px; background:var(--stamp); color:#fff; cursor:pointer; box-shadow:0 .35rem .9rem rgba(0,0,0,.3); transition:background .15s, transform .15s var(--ease-out); }
+  #spin:hover:not(:disabled) { background:var(--stamp-hover); }
+  #spin:active:not(:disabled) { transform:translateY(2px) scale(.99); }
+  #spin:disabled { background:#3a4c6c; color:#9aa7bd; box-shadow:none; cursor:not-allowed; }
+  #hint { font-size:.95rem; color:var(--paper-dim); }
+
+  aside { background:var(--navy-deep); border-left:1px solid var(--line); padding:1.1rem 1rem; display:flex; flex-direction:column; min-height:0; }
+  aside h2 { margin:0 0 .5rem; font-size:1.3rem; font-weight:700; display:flex; justify-content:space-between; align-items:baseline; }
+  #count { font-size:.95rem; font-weight:500; color:var(--paper-dim); font-variant-numeric:tabular-nums; }
+  #list { list-style:none; margin:0; padding:0; overflow-y:auto; flex:1 1 auto; min-height:0; scrollbar-width:thin; scrollbar-color:#3a4f73 transparent; }
+  #list li { display:flex; align-items:center; gap:.6rem; padding:.5rem .4rem; border-bottom:1px solid var(--line); font-size:1.2rem; transition:background .15s; }
+  #list li:hover { background:#16243d; }
+  #list li.off .name, #list li.excl .name { color:#8396ba; text-decoration:line-through; }
+  #list .name { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  #list .tag { font-size:.85rem; font-weight:700; color:var(--stamp-soft); white-space:nowrap; }
+  #list input[type=checkbox] { width:1.2rem; height:1.2rem; margin:0; accent-color:var(--stamp); cursor:pointer; }
+  .x { width:2rem; height:2rem; border:0; border-radius:8px; background:none; color:var(--paper-dim); font-size:1.4rem; line-height:1; cursor:pointer; transition:background .15s, color .15s; }
+  .x:hover { background:#2a3d5e; color:#fff; }
+  #addForm { display:flex; gap:.5rem; margin-top:.8rem; }
+  #addForm input { flex:1; min-width:0; font:inherit; font-size:1.05rem; padding:.55rem .7rem; border-radius:8px; border:1px solid #3a4f73; background:var(--navy); color:var(--paper); caret-color:var(--stamp-soft); }
+  #addForm input::placeholder { color:#8fa3c8; }
+  #addForm input:focus-visible { outline:none; border-color:var(--paper); }
+  #addForm button { font-size:1.05rem; font-weight:700; padding:.55rem .9rem; border:0; border-radius:8px; background:var(--paper); color:var(--navy); cursor:pointer; transition:background .15s; }
+  #addForm button:hover { background:#fff; }
+  #addMsg { min-height:1.3rem; margin-top:.3rem; font-size:.9rem; color:var(--stamp-soft); }
+  #foot { display:flex; gap:.5rem; margin-top:.4rem; }
+  #foot button { flex:1; white-space:nowrap; font-size:.9rem; padding:.55rem .6rem; border-radius:8px; cursor:pointer; background:transparent; border:1px solid #3a4f73; color:var(--paper); transition:background .15s, border-color .15s; }
+  #foot button:hover { background:#1b2c49; border-color:#5a7099; }
+  #snd { flex:0 0 auto !important; }
+  #snd.on { background:var(--paper); border-color:var(--paper); color:var(--navy); }
+  #snd.on:hover { background:#fff; }
+  #resetBtn { color:var(--paper-dim); }
+  body.busy aside { pointer-events:none; opacity:.5; }
+
+  #toast { position:fixed; left:50%; bottom:1.3rem; transform:translateX(-50%); background:var(--paper); color:var(--navy); padding:.7rem 1rem; border-radius:12px; font-size:1.05rem; font-weight:700; display:none; box-shadow:0 .5rem 1.5rem rgba(0,0,0,.4); z-index:30; }
+  #toast button { margin-left:.8rem; border:0; background:var(--navy); color:var(--paper); border-radius:8px; padding:.3rem .8rem; font-weight:700; cursor:pointer; }
+  #toast button:hover { background:#2a3d5e; }
+
+  #overlay { position:fixed; inset:0; background:rgba(10,18,32,.9); display:none; align-items:center; justify-content:center; z-index:20; }
+  #overlay.show { display:flex; }
+  #overlay.show #card { animation:rise .45s var(--ease-out) both; }
+  @keyframes rise { from { opacity:0; transform:translateY(1.5rem) scale(.96); } to { opacity:1; transform:none; } }
+  #confetti { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+  #card { position:relative; text-align:center; padding:2.4rem 4rem 1.8rem; background:var(--paper); color:var(--navy); border-radius:16px; max-width:90vw; box-shadow:0 1.5rem 4rem rgba(0,0,0,.5); }
+  #card .lead { font-size:1.5rem; color:#4a5a73; }
+  #card .menu { font-size:clamp(3rem,8vw,6rem); font-weight:700; line-height:1.15; letter-spacing:-.02em; margin:.5rem 0 1.5rem; overflow-wrap:anywhere; text-wrap:balance; }
+  #card button { font-size:1.5rem; font-weight:700; padding:.65em 1.5em; margin:.25rem .4rem; border:0; border-radius:12px; cursor:pointer; transition:background .15s, transform .15s var(--ease-out); }
+  #card button:active { transform:translateY(2px) scale(.99); }
+  #okBtn { background:var(--navy); color:#fff; }
+  #okBtn:hover { background:#2a3d5e; }
+  #againBtn { background:transparent; color:var(--navy); box-shadow:inset 0 0 0 2px var(--navy); }
+  #againBtn:hover { background:#e6e0d2; }
+  #closeBtn { display:block; margin:.7rem auto 0 !important; font-size:1rem !important; font-weight:500 !important; background:none; color:#4a5a73; padding:.3em .8em !important; }
+  #closeBtn:hover { color:var(--navy); text-decoration:underline; }
+  #card :focus-visible { outline-color:var(--navy); }
+
+  @media (max-width:860px) {
+    body { grid-template-columns:minmax(0,1fr); overflow:auto; height:auto; }
+    #wheelWrap { flex:none; height:min(92vw,70vh); }
+    aside { min-height:60vh; border-left:0; border-top:1px solid var(--line); }
+  }
+  @media (prefers-reduced-motion:reduce) {
+    #overlay.show #card { animation:none; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div id="today"></div>
+  <div id="wheelWrap"><canvas id="wheel" width="900" height="900"></canvas></div>
+  <div id="notice"></div>
+  <button id="spin">돌리기</button>
+  <div id="hint">스페이스바로도 돌릴 수 있어요</div>
+</main>
+
+<aside>
+  <h2>메뉴 <span id="count"></span></h2>
+  <ul id="list"></ul>
+  <form id="addForm" autocomplete="off">
+    <input id="addInput" maxlength="20" placeholder="메뉴 추가">
+    <button type="submit">추가</button>
+  </form>
+  <div id="addMsg"></div>
+  <div id="foot">
+    <button id="snd" type="button">소리 꺼짐</button>
+    <button id="resetBtn" type="button">처음 메뉴로 되돌리기</button>
+  </div>
+</aside>
+
+<div id="toast"></div>
+
+<div id="overlay">
+  <canvas id="confetti"></canvas>
+  <div id="card">
+    <div class="lead">오늘 점심은</div>
+    <div class="menu" id="resultName"></div>
+    <div>
+      <button id="okBtn">이걸로 확정</button>
+      <button id="againBtn">다시 돌리기</button>
+    </div>
+    <button id="closeBtn">닫기</button>
+  </div>
+</div>
+
+<script>
+const DEFAULT_MENU = ["김치찌개","제육볶음","돈가스","짜장면","국밥","비빔밥","햄버거","샐러드"];
+const MAX_MENU = 16;
+const PALETTE = ["#b8402f","#9a5b0c","#3d7a45","#17757f","#3b55c4","#7a4bb5","#a93a76","#55657a"];
+const FONT = "'Pretendard','Malgun Gothic','Apple SD Gothic Neo',sans-serif";
+const TAU = Math.PI * 2;
+const mod = (x, m) => ((x % m) + m) % m;
+const $ = id => document.getElementById(id);
+
+// ---------- storage (browser-local; every access guarded) ----------
+const KEY = "lunchRoulette.v1.";
+function load(name, fallback) {
+  try { const v = localStorage.getItem(KEY + name); return v === null ? fallback : JSON.parse(v); }
+  catch (e) { return fallback; }
+}
+function save(name, value) {
+  try { localStorage.setItem(KEY + name, JSON.stringify(value)); } catch (e) {}
+}
+
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+
+// ---------- state ----------
+let items = load("items", null);
+if (!Array.isArray(items) || !items.length) items = DEFAULT_MENU.map(n => ({ name: n, on: true }));
+let history = load("history", []);           // [{date, name}] confirmed menus
+let skipped = load("skipped", { date: "", names: [] });
+if (skipped.date !== todayStr()) skipped = { date: todayStr(), names: [] };
+let sound = load("sound", false) === true;
+
+let wheelNames = [];
+let theta = 0, spinning = false, pointerKick = 0, lastIdx = -1;
+let pendingName = null, pendingSingle = false;
+
+function saveItems() { save("items", items); }
+function saveHistory() { save("history", history); }
+function saveSkipped() { save("skipped", skipped); }
+
+function yesterdayName() {
+  const t = todayStr();
+  for (let i = history.length - 1; i >= 0; i--) if (history[i].date !== t) return history[i].name;
+  return null;
+}
+function todayConfirmed() {
+  const h = history.find(h => h.date === todayStr());
+  return h ? h.name : null;
+}
+
+// ---------- which menus go on the wheel ----------
+function computePool() {
+  const base = items.filter(i => i.on).map(i => i.name);
+  if (base.length < 2) return { pool: [], block: true, msg: "메뉴를 2개 이상 켜 주세요." };
+  const y = yesterdayName();
+  const sk = skipped.names;
+  const pool = base.filter(n => !sk.includes(n) && n !== y);
+  if (pool.length >= 2) return { pool, msg: "" };
+  const noSkip = base.filter(n => !sk.includes(n));
+  if (noSkip.length >= 2) return { pool: noSkip, msg: "메뉴가 부족해서 어제 메뉴도 넣었어요." };
+  if (noSkip.length === 1) return { pool: noSkip, single: true, msg: "남은 메뉴가 이것뿐이에요." };
+  skipped.names = []; saveSkipped();
+  const r = computePool();
+  r.msg = "모든 메뉴를 한 번씩 넘겨서 처음부터 다시 돌려요." + (r.msg ? " " + r.msg : "");
+  return r;
+}
+
+// ---------- wheel drawing ----------
+const cv = $("wheel"), g = cv.getContext("2d");
+function segColor(i, n) {
+  let c = i % PALETTE.length;
+  if (i === n - 1 && c === 0) c = 3;   // last wedge must differ from the first
+  return PALETTE[c];
+}
+function shortName(s) { return s.length > 8 ? s.slice(0, 7) + "…" : s; }
+
+function drawWheel() {
+  const W = 900, R = 400, cx = 450, cy = 470;
+  g.clearRect(0, 0, W, W);
+  const n = wheelNames.length;
+  g.save(); g.translate(cx, cy);
+  // paper rim
+  g.beginPath(); g.arc(0, 0, R + 9, 0, TAU); g.lineWidth = 18; g.strokeStyle = "#f3eee3"; g.stroke();
+  if (n < 1) {
+    g.beginPath(); g.arc(0, 0, R, 0, TAU); g.fillStyle = "#2c4166"; g.fill();
+    g.fillStyle = "#f3eee3"; g.textAlign = "center"; g.font = "700 44px " + FONT;
+    g.fillText("메뉴를 켜 주세요", 0, 14);
+  } else {
+    const A = TAU / n;
+    const fs = n <= 8 ? 50 : n <= 12 ? 42 : 34;
+    for (let i = 0; i < n; i++) {
+      const a0 = theta + i * A;
+      g.beginPath(); g.moveTo(0, 0); g.arc(0, 0, R, a0, a0 + A); g.closePath();
+      g.fillStyle = segColor(i, n); g.fill();
+      g.strokeStyle = "#f3eee3"; g.lineWidth = 4; g.stroke();
+      g.save(); g.rotate(a0 + A / 2); g.textAlign = "right"; g.fillStyle = "#fff";
+      g.font = "700 " + fs + "px " + FONT;
+      g.fillText(shortName(wheelNames[i]), R - 38, fs * 0.35); g.restore();
+    }
+    // pegs on the rim at each wedge boundary, so the pointer has something to flick against
+    g.fillStyle = "#1B2A44";
+    for (let i = 0; i < n; i++) {
+      const a = theta + i * A;
+      g.beginPath(); g.arc(Math.cos(a) * (R + 9), Math.sin(a) * (R + 9), 6, 0, TAU); g.fill();
+    }
+  }
+  // hub
+  g.shadowColor = "rgba(0,0,0,.35)"; g.shadowBlur = 14; g.shadowOffsetY = 4;
+  g.beginPath(); g.arc(0, 0, 46, 0, TAU); g.fillStyle = "#f3eee3"; g.fill();
+  g.shadowColor = "transparent";
+  g.beginPath(); g.arc(0, 0, 16, 0, TAU); g.fillStyle = "#1B2A44"; g.fill();
+  g.restore();
+  // pointer
+  g.save(); g.translate(cx, cy - R - 40); g.rotate(pointerKick);
+  g.shadowColor = "rgba(0,0,0,.4)"; g.shadowBlur = 10; g.shadowOffsetY = 4;
+  g.beginPath(); g.moveTo(-26, -26); g.lineTo(26, -26); g.lineTo(0, 48); g.closePath();
+  g.fillStyle = "#c0392b"; g.fill();
+  g.shadowColor = "transparent"; g.strokeStyle = "#f3eee3"; g.lineWidth = 5; g.lineJoin = "round"; g.stroke();
+  g.restore();
+}
+function underPointer() {
+  const n = wheelNames.length;
+  return Math.floor(mod(-Math.PI / 2 - theta, TAU) / (TAU / n));
+}
+
+// ---------- sound (off by default; starts only after a click) ----------
+let actx = null;
+function beep(freq, dur, vol, when) {
+  if (!sound) return;
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    const o = actx.createOscillator(), v = actx.createGain();
+    o.frequency.value = freq; v.gain.value = vol;
+    o.connect(v); v.connect(actx.destination);
+    const t = actx.currentTime + (when || 0);
+    o.start(t); o.stop(t + dur);
+  } catch (e) {}
+}
+const tick = () => beep(900, 0.03, 0.06);
+const chime = () => { beep(660, 0.18, 0.1, 0); beep(880, 0.18, 0.1, 0.16); beep(1100, 0.3, 0.1, 0.32); };
+
+// ---------- spin (variant B: slight overshoot, then settles) ----------
+const ease = t => { const c1 = 1.2, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
+const SPIN_SEC = 5;
+
+function spin() {
+  if (spinning || $("overlay").classList.contains("show")) return;
+  const comp = computePool();
+  render();
+  if (comp.block) return;
+  if (comp.single) { showResult(comp.pool[0], true); return; }
+
+  wheelNames = comp.pool.slice();          // freeze wheel for this spin
+  const n = wheelNames.length, A = TAU / n;
+  const k = Math.floor(Math.random() * n); // winner is decided before the animation
+  const jitter = (Math.random() - 0.5) * A * 0.7;
+  const end = -Math.PI / 2 - (k + 0.5) * A + jitter;
+  const delta = mod(end - theta, TAU) + TAU * (5 + Math.floor(Math.random() * 3));
+  const start = theta, t0 = performance.now();
+  spinning = true; document.body.classList.add("busy"); $("spin").disabled = true;
+  lastIdx = underPointer();
+
+  (function frame(now) {
+    const t = Math.min((now - t0) / 1000 / SPIN_SEC, 1);
+    theta = start + delta * ease(t);
+    const idx = underPointer();
+    if (idx !== lastIdx) { lastIdx = idx; pointerKick = -0.5; tick(); }
+    pointerKick *= 0.85;
+    drawWheel();
+    if (t < 1) return requestAnimationFrame(frame);
+    theta = start + delta; pointerKick = 0; drawWheel();
+    spinning = false; document.body.classList.remove("busy");
+    showResult(wheelNames[k], false);
+  })(t0);
+}
+
+// ---------- result overlay ----------
+function showResult(name, single) {
+  pendingName = name; pendingSingle = single;
+  $("resultName").textContent = name;
+  $("againBtn").style.display = single ? "none" : "";
+  $("overlay").classList.add("show");
+  chime(); startConfetti();
+}
+function hideOverlay() { $("overlay").classList.remove("show"); stopConfetti(); render(); }
+
+$("okBtn").onclick = () => {
+  const t = todayStr();
+  history = history.filter(h => h.date !== t);
+  history.push({ date: t, name: pendingName });
+  history = history.slice(-30);
+  skipped = { date: t, names: [] };
+  saveHistory(); saveSkipped();
+  hideOverlay();
+};
+$("againBtn").onclick = () => {
+  if (!skipped.names.includes(pendingName)) skipped.names.push(pendingName);
+  skipped.date = todayStr(); saveSkipped();
+  hideOverlay();
+  setTimeout(spin, 350);
+};
+$("closeBtn").onclick = hideOverlay;
+
+// ---------- confetti ----------
+let confettiRaf = 0, parts = [];
+function startConfetti() {
+  const c = $("confetti"); c.width = innerWidth; c.height = innerHeight;
+  const x = c.getContext("2d");
+  parts = Array.from({ length: 140 }, () => ({
+    x: Math.random() * c.width, y: -20 - Math.random() * c.height * 0.5,
+    vx: (Math.random() - 0.5) * 3, vy: 2 + Math.random() * 4,
+    s: 6 + Math.random() * 8, r: Math.random() * TAU, vr: (Math.random() - 0.5) * 0.3,
+    c: PALETTE[Math.floor(Math.random() * PALETTE.length)]
+  }));
+  const t0 = performance.now();
+  cancelAnimationFrame(confettiRaf);
+  (function f(now) {
+    x.clearRect(0, 0, c.width, c.height);
+    parts.forEach(p => {
+      p.x += p.vx; p.y += p.vy; p.r += p.vr;
+      x.save(); x.translate(p.x, p.y); x.rotate(p.r); x.fillStyle = p.c; x.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); x.restore();
+    });
+    if (now - t0 < 4000) confettiRaf = requestAnimationFrame(f); else x.clearRect(0, 0, c.width, c.height);
+  })(t0);
+}
+function stopConfetti() { cancelAnimationFrame(confettiRaf); }
+
+// ---------- menu list ----------
+function render() {
+  const comp = computePool();
+  if (!spinning) { wheelNames = comp.pool.slice(); drawWheel(); }
+  $("notice").textContent = comp.msg;
+  $("spin").disabled = spinning || !!comp.block;
+  const tc = todayConfirmed();
+  $("today").textContent = tc ? "오늘 점심 확정: " + tc : "";
+  $("count").textContent = items.length + " / " + MAX_MENU;
+  $("snd").textContent = sound ? "소리 켜짐" : "소리 꺼짐";
+  $("snd").classList.toggle("on", sound);
+  $("snd").setAttribute("aria-pressed", sound);
+
+  const y = yesterdayName(), list = $("list");
+  list.textContent = "";
+  items.forEach((it, idx) => {
+    const li = document.createElement("li");
+    let tag = "";
+    if (it.on && tc === it.name) tag = "오늘 확정";
+    else if (it.on && skipped.names.includes(it.name)) tag = "오늘 넘김";
+    else if (it.on && y === it.name) tag = "어제 먹음";
+    li.className = (it.on ? "" : "off") + (tag && tag !== "오늘 확정" ? " excl" : "");
+    const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = it.on;
+    cb.onchange = () => { it.on = cb.checked; saveItems(); render(); };
+    const nm = document.createElement("span"); nm.className = "name"; nm.textContent = it.name; nm.title = it.name;
+    const tg = document.createElement("span"); tg.className = "tag"; tg.textContent = tag;
+    const x = document.createElement("button"); x.className = "x"; x.type = "button"; x.textContent = "×"; x.title = "지우기";
+    x.onclick = () => removeItem(idx);
+    li.append(cb, nm, tg, x);
+    list.appendChild(li);
+  });
+}
+
+let toastTimer = 0;
+function removeItem(idx) {
+  const [gone] = items.splice(idx, 1);
+  saveItems(); render();
+  const t = $("toast");
+  t.textContent = "「" + gone.name + "」를 지웠어요";
+  const b = document.createElement("button"); b.textContent = "되돌리기";
+  b.onclick = () => { items.splice(idx, 0, gone); saveItems(); t.style.display = "none"; clearTimeout(toastTimer); render(); };
+  t.appendChild(b);
+  t.style.display = "block";
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.style.display = "none"; }, 5000);
+}
+
+$("addForm").onsubmit = e => {
+  e.preventDefault();
+  const name = $("addInput").value.trim(), msg = $("addMsg");
+  if (!name) return;
+  if (items.length >= MAX_MENU) { msg.textContent = MAX_MENU + "개까지 넣을 수 있어요."; return; }
+  if (items.some(i => i.name === name)) { msg.textContent = "이미 있는 메뉴예요."; return; }
+  items.push({ name, on: true }); saveItems();
+  $("addInput").value = ""; msg.textContent = "";
+  render();
+};
+$("addInput").oninput = () => { $("addMsg").textContent = ""; };
+
+$("resetBtn").onclick = () => {
+  if (!confirm("메뉴를 처음 8개로 되돌릴까요? 지금 목록은 사라져요.")) return;
+  items = DEFAULT_MENU.map(n => ({ name: n, on: true }));
+  saveItems(); render();
+};
+$("snd").onclick = () => { sound = !sound; save("sound", sound); render(); if (sound) tick(); };
+
+// ---------- spin trigger ----------
+$("spin").onclick = e => { e.target.blur(); spin(); };
+addEventListener("keydown", e => {
+  if (e.code !== "Space" || e.target.tagName === "INPUT") return;
+  e.preventDefault(); spin();
+});
+addEventListener("keyup", e => {
+  if (e.code === "Space" && e.target.tagName !== "INPUT") e.preventDefault();
+});
+
+render();
+// canvas text needs the embedded font; redraw once it is ready
+if (document.fonts && document.fonts.load) {
+  document.fonts.load("700 40px Pretendard").then(() => { if (!spinning) drawWheel(); });
+}
+</script>
+</body>
+</html>
