@@ -1,0 +1,92 @@
+[
+  {
+    "label": "8개(기본)",
+    "id": "8",
+    "same": true,
+    "diff": null,
+    "len": [
+      192142,
+      192142
+    ],
+    "textCalls": [
+      8,
+      8
+    ],
+    "notice": [
+      "",
+      ""
+    ],
+    "errors": [
+      [],
+      [
+        "console.error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ]
+    ]
+  },
+  {
+    "label": "12개",
+    "id": "12",
+    "same": true,
+    "diff": null,
+    "len": [
+      253614,
+      253614
+    ],
+    "textCalls": [
+      12,
+      12
+    ],
+    "notice": [
+      "",
+      ""
+    ],
+    "errors": [
+      [],
+      []
+    ]
+  },
+  {
+    "label": "16개",
+    "id": "16",
+    "same": true,
+    "diff": null,
+    "len": [
+      261962,
+      261962
+    ],
+    "textCalls": [
+      16,
+      16
+    ],
+    "notice": [
+      "",
+      ""
+    ],
+    "errors": [
+      [],
+      []
+    ]
+  },
+  {
+    "label": "켜진 메뉴 1개",
+    "id": "on1",
+    "same": true,
+    "diff": null,
+    "len": [
+      110294,
+      110294
+    ],
+    "textCalls": [
+      1,
+      1
+    ],
+    "notice": [
+      "메뉴를 2개 이상 켜 주세요.",
+      "메뉴를 2개 이상 켜 주세요."
+    ],
+    "errors": [
+      [],
+      []
+    ]
+  }
+]

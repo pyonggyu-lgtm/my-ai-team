@@ -1,0 +1,30 @@
+{
+  "ok": true,
+  "responses": [
+    {
+      "url": "http://localhost:8080/fonts/Pretendard-Bold.woff2",
+      "status": 200,
+      "type": "font/woff2"
+    },
+    {
+      "url": "http://localhost:8080/fonts/Pretendard-Medium.woff2",
+      "status": 200,
+      "type": "font/woff2"
+    }
+  ],
+  "new": {
+    "check700": true,
+    "check500": true,
+    "loaded": [
+      "500:loaded",
+      "700:loaded"
+    ]
+  },
+  "orig": {
+    "check700": true,
+    "loaded": [
+      "500:loaded",
+      "700:loaded"
+    ]
+  }
+}

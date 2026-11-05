@@ -39,7 +39,7 @@ LIST=$(mktemp)
 RUN=""
 trap 'rm -f "$LIST"; [ -n "$RUN" ] && cd / && rm -rf "$RUN"' EXIT
 if [ ${#TARGETS[@]} -eq 0 ]; then
-  { git -c core.quotepath=off diff --name-only HEAD 2>/dev/null; git -c core.quotepath=off ls-files --others --exclude-standard 2>/dev/null; } | sort -u > "$LIST"
+  { git -c safe.directory=/workspace -c core.quotepath=off diff --name-only HEAD 2>/dev/null; git -c safe.directory=/workspace -c core.quotepath=off ls-files --others --exclude-standard 2>/dev/null; } | sort -u > "$LIST"
   MODE="커밋 안 된 변경"
 else
   for t in "${TARGETS[@]}"; do
