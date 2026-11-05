@@ -131,6 +131,14 @@ export const rateLimitMiddleware = limiter => (req, res, next) => {
   next();
 };
 
+// 성공한 요청만 센다(참여 성공 횟수 제한). 이미 막힌 주소면 429, 통과하면 req.recordSuccess() 로 기록한다.
+export const successLimitMiddleware = limiter => (req, res, next) => {
+  const r = limiter.isBlocked(req.ip);
+  if (r.blocked) return tooMany(res, r.retryAfterSec);
+  req.recordSuccess = () => limiter.recordFailure(req.ip);
+  next();
+};
+
 // 요청마다 센다(맞든 틀리든). max 번까지 통과, 그다음부터 429. 그룹 만들기처럼 인증 없이 데이터를 만드는 API 용.
 export const countedRateLimitMiddleware = limiter => (req, res, next) => {
   const r = limiter.isBlocked(req.ip);

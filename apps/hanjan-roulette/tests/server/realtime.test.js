@@ -227,3 +227,26 @@ test("기기 → 서버 이벤트는 2단계에 없다: 소켓으로 보낸 쓰�
   await quiet(300);
   assert.deepEqual(sb.log, []);
 });
+
+test("[D-2④] 접속 확인과 방 가입 사이에 나간 멤버는 방에 들어가지 못하고 서버가 끊는다", async () => {
+  const A = await makeGroup("회사", "에이");
+  const B = await join(A, "비");
+  const sa = await open(A);
+  // 인증 미들웨어(realtime) 통과 직후, connection 직전에 나가기가 끼어든 상황
+  let once = true;
+  srv.io.use((s, next) => {
+    if (once && s.data.memberId === B.mid) { once = false; srv.db.leaveMember({ groupId: A.gid, memberId: B.mid }); }
+    next();
+  });
+  const sb = connectIo(base, { auth: { token: B.token, groupId: B.gid }, transports: ["websocket"], reconnection: false, forceNew: true });
+  sockets.push(sb);
+  sb.log = [];
+  sb.onAny((event, payload) => sb.log.push({ event, payload }));
+  assert.equal(await new Promise(res => sb.once("disconnect", res)), "io server disconnect");
+  const room = srv.io.sockets.adapter.rooms.get(`group:${A.gid}`);
+  assert.ok(![...room].some(id => srv.io.sockets.sockets.get(id)?.data.memberId === B.mid));
+  await call("PATCH", `/api/boards/${A.board.id}`, { token: A.token, body: { name: "바뀜" } });
+  await quiet(100);
+  assert.equal(sb.log.length, 0, "나간 멤버는 이벤트를 못 받는다");
+  assert.equal(sa.connected, true);
+});

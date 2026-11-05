@@ -89,4 +89,7 @@ export function joinParam(search) {
     return v == null ? null : cleanCodeInput(v);
   } catch { return null; }
 }
+// 이미 그룹에 든 기기로 초대 링크(?join=)를 열었을 때: 같은 그룹 링크면 조용히, 다른 그룹(또는 알 수 없음)이면 알려 준다.
+export const ALREADY_IN_GROUP = "이미 그룹에 들어 있어요. 다른 그룹에 들어가려면 그룹 설정에서 나가기를 먼저 해 주세요.";
+export const isOtherGroupLink = (joinCode, group) => !!joinCode && cleanCodeInput(joinCode) !== (group?.inviteCode ?? null);
 export const yesterdayOf = today => addDays(today, -1);

@@ -7,7 +7,7 @@ import { dirname } from "node:path";
 import { todayKST } from "../client/js/kst.js";
 import { yesterdayName } from "../client/js/pool.js";
 import { DATE_RE } from "../client/js/records.js";
-import { TEMPLATES, MAX_ITEMS, MAX_BOARDS } from "../client/js/templates.js";
+import { TEMPLATES, MAX_ITEMS, MAX_BOARDS, MAX_MEMBERS } from "../client/js/templates.js";
 
 export class DbError extends Error {
   constructor(code, message) {
@@ -22,6 +22,7 @@ const MSG = {
   itemLimit: "16개까지 넣을 수 있어요.",
   dupItem: "이미 있는 메뉴예요.",
   boardLimit: "메뉴판은 10개까지 만들 수 있어요.",
+  memberLimit: "이 그룹은 30명까지 들어올 수 있어요.",
   lastBoard: "메뉴판은 1개 이상 있어야 해요.",
   ownerLeave: "다른 멤버가 있으면 만든 사람은 나갈 수 없어요.",
   noBoard: "메뉴판을 찾을 수 없어요.",
@@ -237,6 +238,7 @@ export function openDb(path, { now = () => new Date() } = {}) {
     },
     addMember: tx(({ groupId, nickname, tokenHash }) => {
       if (!q.group.get(groupId)) fail("NOT_FOUND", MSG.noGroup);
+      if (q.activeCount.get(groupId).c >= MAX_MEMBERS) fail("LIMIT_REACHED", MSG.memberLimit);
       const id = newId();
       const at = nowIso();
       sqlite.prepare("INSERT INTO members (id, group_id, nickname, token_hash, joined_at) VALUES (?,?,?,?,?)")
@@ -366,7 +368,7 @@ export function openDb(path, { now = () => new Date() } = {}) {
       const today = todayNow();
       const old = q.historyOne.get(boardId, date);
       if (old && !overwrite) {
-        return { ok: false, existing: { name: old.name, nickname: old.nickname, confirmedAt: old.confirmed_at } };
+        return { ok: false, existing: { name: old.name, nickname: old.nickname, confirmedAt: old.confirmed_at, date } };
       }
       if (old) {
         sqlite.prepare("UPDATE history SET name = ?, member_id = ?, confirmed_at = ? WHERE board_id = ? AND date = ?")

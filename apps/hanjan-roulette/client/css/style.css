@@ -295,3 +295,5 @@
   .btn[hidden] { display:none; }
   /* 1단계 창 .btn 글씨 보정 (.dlg button{font:inherit}가 이기는 문제) */
   .dlg .btn, .dlg .chip { font-size:1.125rem; font-weight:700; }
+  /* 비활성 버튼은 흐리게(요청 중 혼자 쓰기 등) */
+  .btn:disabled { opacity:.5; cursor:not-allowed; }

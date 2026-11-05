@@ -737,3 +737,81 @@ test("[C권고6] 오류 문구에 영어 필드 이름이 없다", async () => {
   assert.equal(msgs[3], "기록 범위가 올바르지 않아요.");
   for (const m of msgs) assert.ok(!/[A-Za-z]{3,}/.test(m), "영어 단어: " + m);
 });
+
+
+// ───────── D-2 (진육 C-2+D 리뷰 권고) ─────────
+test("[D-2①] 로그: 대소문자·연속 슬래시를 바꿔 써도 초대 코드는 기록에 남지 않는다", async () => {
+  const A = await makeGroup();
+  await call("GET", `/API/Invites/${A.code}`);
+  await call("GET", `/api//invites/${A.code}`);
+  await call("GET", `/Api///INVITES//${A.code}/join`);
+  await call("GET", `/api/invites/${A.code.toLowerCase()}`);
+  const text = logs.join("\n");
+  assert.ok(!text.toLowerCase().includes(A.code.toLowerCase()), text);
+  assert.ok(logs.some(l => l.endsWith("/api/invites/*** 200")), text);
+});
+
+test("[D-2③] 그룹 만들기 제한은 본문을 읽기 전에: 막힌 주소는 깨진 JSON·큰 본문도 400/413 이 아니라 429", async () => {
+  await srv.close(); rmSync(dir, { recursive: true, force: true });
+  await start({ createLimit: { max: 1 } });
+  const ip = "7.7.7.7";
+  assert.equal((await call("POST", "/api/groups", { body: { name: "g", nickname: "n" }, ip })).status, 201);
+  assert.equal((await call("POST", "/api/groups", { raw: "{깨진", ip })).status, 429);
+  assert.equal((await call("POST", "/api/groups", { raw: JSON.stringify({ name: "x".repeat(2_000_000) }), ip })).status, 429);
+  assert.equal((await call("POST", "/api/groups/", { body: { name: "g", nickname: "n" }, ip })).status, 429); // 끝 슬래시로 피할 수 없다
+  assert.equal((await call("POST", "/API/groups", { body: { name: "g", nickname: "n" }, ip })).status, 429);
+});
+
+test("[D-2⑥] 그룹당 활성 멤버 30명: 31번째 참여는 422 LIMIT_REACHED, 한 명이 나가면 다시 들어올 수 있다", async () => {
+  const A = await makeGroup();
+  const members = [];
+  for (let i = 1; i < 30; i++) members.push(await join(A.code, "m" + i));
+  assert.equal((await call("GET", `/api/invites/${A.code}`)).body.memberCount, 30);
+  const r = await call("POST", `/api/invites/${A.code}/join`, { body: { nickname: "늦음" } });
+  assert.equal(r.status, 422);
+  assert.equal(r.body.error.code, "LIMIT_REACHED");
+  assert.equal(r.body.error.message, "이 그룹은 30명까지 들어올 수 있어요.");
+  assert.equal(srv.db.memberCount(A.gid), 30);
+  assert.equal((await call("DELETE", `/api/groups/${A.gid}/members/me`, { token: members[0].token })).status, 204);
+  assert.equal((await call("POST", `/api/invites/${A.code}/join`, { body: { nickname: "늦음" } })).status, 201);
+});
+
+test("[D-2⑥] 참여 성공도 주소당 1시간에 30번: 31번째는 429(초대 틀린 시도 제한과 별개), 1시간 뒤 풀림", async () => {
+  await srv.close(); rmSync(dir, { recursive: true, force: true });
+  await start({ joinLimit: { max: 3 } });
+  const ip = "8.8.8.8";
+  // 그룹을 여러 개 만들어 30명 제한에 걸리지 않게
+  const gs = [await makeGroup("a"), await makeGroup("b")];
+  const j = (g, ipx = ip) => call("POST", `/api/invites/${g.code}/join`, { body: { nickname: "n" }, ip: ipx });
+  assert.equal((await j(gs[0])).status, 201);
+  assert.equal((await j(gs[1])).status, 201);
+  assert.equal((await j(gs[0])).status, 201);
+  const r = await j(gs[0]);
+  assert.equal(r.status, 429);
+  assert.equal(r.body.error.code, "RATE_LIMITED");
+  assert.ok(r.body.error.retryAfterSec > 3500);
+  assert.equal((await call("GET", `/api/invites/${gs[0].code}`, { ip })).status, 200); // 미리 보기는 막히지 않는다
+  assert.equal((await j(gs[0], "8.8.8.9")).status, 201); // 다른 주소
+  clock = "2026-11-05T04:00:01.000Z";
+  assert.equal((await j(gs[0])).status, 201);
+});
+
+test("[D-2⑥] 실패한 참여(닉네임 오류)는 참여 성공 횟수로 세지 않는다", async () => {
+  await srv.close(); rmSync(dir, { recursive: true, force: true });
+  await start({ joinLimit: { max: 1 } });
+  const g = await makeGroup();
+  const ip = "9.9.9.9";
+  assert.equal((await call("POST", `/api/invites/${g.code}/join`, { body: { nickname: "" }, ip })).status, 400);
+  assert.equal((await call("POST", `/api/invites/${g.code}/join`, { body: { nickname: "n" }, ip })).status, 201);
+  assert.equal((await call("POST", `/api/invites/${g.code}/join`, { body: { nickname: "n" }, ip })).status, 429);
+});
+
+test("[D-2] 409 existing 에 date 가 들어 있다(어제 기록인지 화면이 알 수 있게)", async () => {
+  const A = await makeGroup();
+  const yest = "2026-11-04";
+  const first = await call("POST", `/api/boards/${A.board.id}/history`, { token: A.token, body: { name: A.board.items[0].name, date: yest } });
+  assert.equal(first.status, 201, JSON.stringify(first.body));
+  const again = await call("POST", `/api/boards/${A.board.id}/history`, { token: A.token, body: { name: A.board.items[1].name, date: yest } });
+  assert.equal(again.status, 409);
+  assert.equal(again.body.error.existing.date, yest);
+});

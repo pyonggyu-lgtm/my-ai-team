@@ -93,7 +93,7 @@ export function fakeServer({ today = "2026-11-05" } = {}) {
     if (method === "DELETE" && p === "/api/groups/g1/members/me") return json(204, null);
     if (method === "GET" && p === "/api/health") return json(200, { ok: true, today: S.today });
     if (method === "POST" && p === "/api/boards/b1/history") {
-      if (body.date && body.date !== S.today && body.date < S.today && body.date !== "2026-11-04") {
+      if (body.date && body.date !== S.today && body.date < S.today && body.date !== new Date(Date.parse(S.today + "T00:00:00Z") - 86400000).toISOString().slice(0, 10)) {
         return err(400, "VALIDATION", "연결이 오래 끊겨 확정을 보내지 못했어요.");
       }
       const date = body.date ?? S.today;

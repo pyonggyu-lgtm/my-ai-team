@@ -177,12 +177,12 @@ test("온라인 편집: 1단계와 같은 반환 모양(item/index/board)과 검
 });
 
 // ───── 확정·대기열 ─────
-test("연결돼 있으면 확정은 바로 간다(date 는 안 보냄), 409 는 ALREADY_CONFIRMED + existing", async () => {
+test("연결돼 있으면 확정은 바로 간다(누른 날 date 를 함께 보냄), 409 는 ALREADY_CONFIRMED + existing", async () => {
   const { store, server } = await setup();
   const r = await store.confirm("b1", "국밥");
   assert.equal(r.ok, true);
   assert.equal(r.queued, undefined);
-  assert.deepEqual(calls(server, "POST", "/api/boards/b1/history")[0].body, { name: "국밥", overwrite: false });
+  assert.deepEqual(calls(server, "POST", "/api/boards/b1/history")[0].body, { name: "국밥", overwrite: false, date: "2026-11-05" });
   assert.equal(todayConfirmed((await store.getState()).history.b1, "2026-11-05"), "국밥");
   // 누군가 먼저 확정
   const s2 = fakeServer(); s2.setConfirmed("돈가스", "둘");
@@ -698,7 +698,7 @@ test("[E-3] 소켓 파일을 못 불러와도 REST 는 계속 쓰고(편집·확
   let tries = 0;
   const io = fakeIo();
   const st = fakeStorage({ "hanjan.v1.device": JSON.stringify(SIGNED_IN) });
-  const store = createRemoteStore({ storage: st, loadIo: async () => (++tries <= 6 ? null : io), target: fakeTarget(), fetchFn: server.fetch, retryDelays: [], sleep: async () => {}, timers });
+  const store = createRemoteStore({ storage: st, loadIo: async () => (++tries <= 6 ? null : io), target: fakeTarget(), fetchFn: server.fetch, now: () => new Date("2026-11-05T03:00:00.000Z"), retryDelays: [], sleep: async () => {}, timers });
   const conn = [];
   store.onConnection(o => conn.push(o));
   await store.start(); await settle();
@@ -863,4 +863,127 @@ test("[E-3] stop 하면 재시도 타이머도 정리한다", async () => {
   assert.ok(timers.pending().includes(30_000));
   store.stop();
   assert.equal(timers.pending().filter(ms => ms >= 30_000).length, 0);
+});
+
+// ───── E-4 (진육 E-3 재확인 권고) ─────
+test("[E-4①] 확정은 바로 보내도 언제나 누른 날 date 를 보낸다 — 23:59:59 에 누른 것이 서버에서 다음 날이어도 누른 날로 기록", async () => {
+  const server = fakeServer();
+  const { store, clock } = await setup({ server, now: "2026-11-05T14:59:59.000Z" }); // KST 23:59:59
+  server.today = "2026-11-06"; // 요청이 닿을 때 서버는 이미 다음 날
+  assert.equal((await store.confirm("b1", "국밥")).ok, true);
+  assert.equal(calls(server, "POST", "/api/boards/b1/history")[0].body.date, "2026-11-05");
+  assert.equal(server.history.get("2026-11-05").name, "국밥");
+  assert.equal(server.history.has("2026-11-06"), false);
+  assert.equal(clock.t, "2026-11-05T14:59:59.000Z");
+});
+
+test("[E-4②] 소켓이 붙어 있어도 오늘이 마지막으로 받은 날과 다르면 getState 가 서버 상태를 다시 받는다(같은 조합은 30초에 한 번만)", async () => {
+  const server = fakeServer();
+  server.board.confirmed = { name: "국밥", nickname: "둘", confirmedAt: "x" };
+  const { store, clock } = await setup({ server });
+  const states = () => calls(server, "GET", "/api/groups/g1/state").length;
+  const n0 = states();
+  await store.getState(); await settle();
+  assert.equal(states(), n0, "같은 날이면 다시 받지 않는다");
+  clock.t = "2026-11-05T15:00:01.000Z"; // 자정이 지남(소켓 알림은 못 받음)
+  server.today = "2026-11-06"; server.board.confirmed = null; server.board.yesterday = "국밥"; server.bump();
+  await store.getState(); await settle();
+  assert.equal(states(), n0 + 1);
+  const s = await store.getState();
+  assert.equal(s.today, "2026-11-06");
+  assert.equal(yesterdayName(s.history.b1, s.today), "국밥");
+  assert.equal(states(), n0 + 1, "날짜가 맞춰졌으니 더 받지 않는다");
+});
+
+test("[E-4②] 기기 시계가 서버와 달라 계속 어긋나도 요청이 쏟아지지 않는다", async () => {
+  const server = fakeServer(); // 서버는 계속 11-05
+  const { store, clock } = await setup({ server });
+  clock.t = "2026-11-06T03:00:00.000Z";
+  const n0 = calls(server, "GET", "/api/groups/g1/state").length;
+  for (let i = 0; i < 5; i++) { await store.getState(); await settle(); }
+  assert.equal(calls(server, "GET", "/api/groups/g1/state").length, n0 + 1);
+  clock.t = "2026-11-06T03:00:31.000Z";
+  await store.getState(); await settle();
+  assert.equal(calls(server, "GET", "/api/groups/g1/state").length, n0 + 2);
+});
+
+test("[E-4③] 안 보낸 확정은 화면에 반영: 오늘이면 오늘 확정 + 오늘 넘김 비움, 자정을 넘기면 '어제 메뉴'", async () => {
+  const server = fakeServer();
+  server.board.skipped = ["짜장면"];
+  const { store, sock, clock } = await setup({ server });
+  sock.serverDrop(); await settle();
+  assert.equal((await store.confirm("b1", "국밥")).queued, true);
+  let s = await store.getState();
+  assert.equal(todayConfirmed(s.history.b1, s.today), "국밥");
+  assert.deepEqual(s.skipped.b1, [], "확정하면 오늘 넘김은 비워 보인다");
+  clock.t = "2026-11-05T15:00:01.000Z"; // 자정을 넘김
+  s = await store.getState();
+  assert.equal(s.today, "2026-11-06");
+  assert.equal(todayConfirmed(s.history.b1, s.today), null);
+  assert.equal(yesterdayName(s.history.b1, s.today), "국밥");
+  assert.deepEqual(s.skipped.b1, []);
+});
+
+test("[E-4③] 확정 뒤에 쌓인 넘김은 그대로 보인다(순서 유지)", async () => {
+  const { store, sock } = await setup();
+  sock.serverDrop(); await settle();
+  await store.addSkip("b1", "짜장면");
+  await store.confirm("b1", "국밥");
+  await store.addSkip("b1", "돈가스");
+  const s = await store.getState();
+  assert.equal(todayConfirmed(s.history.b1, s.today), "국밥");
+  assert.deepEqual(s.skipped.b1, ["돈가스"]);
+});
+
+// ───── G-3 ④ (진육 재확인 권고) ─────
+test("[G-3④] 연결이 끊겨 있으면 날짜가 바뀌어도 getState 가 서버 요청을 만들지 않는다(refreshIfNewDay 는 canWork 일 때만)", async () => {
+  const server = fakeServer();
+  const { store, sock, clock } = await setup({ server });
+  sock.serverDrop(); await settle();
+  server.down = true;
+  const n0 = server.calls.length;
+  clock.t = "2026-11-06T03:00:00.000Z";
+  await store.getState(); await settle();
+  assert.equal(server.calls.length, n0, "오프라인에서는 요청을 시도하지 않는다");
+});
+
+test("[G-3④] 이미 가는 중인 refresh 가 있어도 소켓 connect 는 새 refresh 를 한 번 더 한다(합치지 않음)", async () => {
+  const server = fakeServer();
+  const { store, sock, target } = await setup({ server });
+  let release, used = false;
+  server.failNext.push(async ({ method, path }) => {
+    if (used || method !== "GET" || path !== "/api/groups/g1/state") return null;
+    used = true; await new Promise(r => { release = r; }); return null;
+  });
+  const states = () => calls(server, "GET", "/api/groups/g1/state").length;
+  const n0 = states();
+  target.fire("visibilitychange"); await settle();      // 느린 refresh 시작
+  assert.equal(states(), n0 + 1);
+  sock.serverDrop(); sock.serverConnect(); await settle();  // 그 사이 연결
+  assert.equal(states(), n0 + 1, "앞 요청이 끝나길 기다린다");
+  release(); await settle();
+  assert.equal(states(), n0 + 2, "앞 요청이 끝난 뒤 새로 한 번 더 받는다");
+  assert.ok(store);
+});
+
+// ───── G-4: 첫 서버 확인 신호 ─────
+test("[G-4] GET /state 가 성공하면 synced 신호, 401 이면 synced 없이 signedOut(캐시가 있어도)", async () => {
+  const ok = await setup();
+  assert.ok(types(ok.events).includes("synced"));
+  // 캐시가 있는 기기 + 무효 토큰 + 늦게 오는 state: start 는 기다리지 않고 돌아오고, 401 이 오면 signedOut 만
+  const first = await setup();
+  const cache = first.st.getItem("hanjan.v1.remote.cache");
+  const st = fakeStorage({ "hanjan.v1.device": JSON.stringify({ ...SIGNED_IN, token: "bad" }), "hanjan.v1.remote.cache": cache });
+  const server = fakeServer();
+  let release;
+  server.failNext.push(async ({ method, path }) => (method === "GET" && path === "/api/groups/g1/state" ? await new Promise(r => { release = r; }) : null));
+  const io = fakeIo();
+  const store = createRemoteStore({ storage: st, io, target: fakeTarget(), fetchFn: server.fetch, retryDelays: [], sleep: async () => {}, timers: { setTimeout: () => 1, clearTimeout: () => {} } });
+  const events = [];
+  store.subscribe(e => events.push(e));
+  await store.start(); await settle();
+  assert.deepEqual(types(events).filter(t => t === "synced" || t === "signedOut"), [], "서버 확인 전: 아무 신호도 없다");
+  assert.ok((await store.getState()).boards.length > 0, "캐시로 먼저 그려진다");
+  release(null); await settle();
+  assert.deepEqual(types(events).filter(t => t === "synced" || t === "signedOut"), ["signedOut"]);
 });

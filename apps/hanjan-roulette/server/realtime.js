@@ -22,6 +22,9 @@ export function createRealtime({ io, db, now = () => new Date(), checkIntervalMs
 
   // 재연결·서버 재시작 뒤에도 새 소켓이 들어오므로 방 가입은 여기서 매번 한다.
   io.on("connection", socket => {
+    // 접속 확인 뒤 방에 들어가기 전에 나갔을 수 있다 → 다시 확인
+    const m = db.getMember(socket.data.memberId);
+    if (!m || m.leftAt) return void socket.disconnect(true);
     socket.join(roomOf(socket.data.groupId));
   });
 

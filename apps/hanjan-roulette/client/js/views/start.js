@@ -3,6 +3,7 @@
 import {
   cleanCodeInput, isFullCode, validateCreate, validateJoin, startErrorMessage, hasMovable, buildImport, importSummary,
 } from "../start-logic.js";
+import { MAX_MEMBERS } from "../templates.js";
 
 const $ = id => document.getElementById(id);
 
@@ -11,7 +12,7 @@ const $ = id => document.getElementById(id);
 export function initStart({ local, remote, onSolo, onEntered, onBack }) {
   const screen = $("startScreen");
   const forms = { create: $("createForm"), join: $("joinForm") };
-  let busy = false, importable = null, lastPreview = "", previewSeq = 0;
+  let busy = false, importable = null, lastPreview = "", previewSeq = 0, groupFull = false;
 
   function setMode(m) {
     $("modeCreate").setAttribute("aria-pressed", String(m === "create"));
@@ -26,7 +27,9 @@ export function initStart({ local, remote, onSolo, onEntered, onBack }) {
   function setBusy(btnId, on, label) {
     busy = on;
     const b = $(btnId);
-    b.disabled = on;
+    b.disabled = on || (btnId === "joinBtn" && groupFull);
+    $("soloBtn").disabled = on;       // 요청 중에는 다른 길로 새지 못하게
+    $("startBackBtn").disabled = on;
     if (on) { b.dataset.label = b.textContent; b.textContent = "잠시만요…"; } else if (b.dataset.label) { b.textContent = b.dataset.label; }
     void label;
   }
@@ -64,15 +67,21 @@ export function initStart({ local, remote, onSolo, onEntered, onBack }) {
     const seq = ++previewSeq;
     const r = await remote.previewInvite(code); // 6글자가 된 순간 한 번만(시도 제한이 10분에 10번)
     if (seq !== previewSeq || $("joinCode").value !== code) return;
-    if (!r.ok) { setMsg("joinMsg", startErrorMessage(r, "join")); return; }
+    if (!r.ok) { lastPreview = ""; setMsg("joinMsg", startErrorMessage(r, "join")); return; } // 같은 코드로 다시 시도할 수 있게
     $("joinGroupName").textContent = r.groupName;
     $("joinGroupCount").textContent = `지금 ${r.memberCount}명이 함께 있어요`;
     $("joinPreview").hidden = false;
+    if (r.memberCount >= MAX_MEMBERS) { // 서버가 어차피 거절한다 → 미리 알리고 참여 버튼을 막는다
+      groupFull = true; $("joinBtn").disabled = true;
+      setMsg("joinMsg", `이 그룹은 ${MAX_MEMBERS}명이 다 찼어요.`);
+    }
   }
   function onCodeInput() {
     const input = $("joinCode");
     const code = cleanCodeInput(input.value);
     if (input.value !== code) input.value = code;
+    if (isFullCode(code) && code === lastPreview) return;   // 이미 미리 보기를 요청(또는 표시)한 같은 코드면 그대로 둔다
+    groupFull = false; if (!busy) $("joinBtn").disabled = false;
     previewSeq++;                                  // 이전 미리 보기 결과는 버린다
     $("joinPreview").hidden = true;
     setMsg("joinMsg", "");
@@ -94,8 +103,8 @@ export function initStart({ local, remote, onSolo, onEntered, onBack }) {
     onEntered();
   };
 
-  $("soloBtn").onclick = () => { onSolo(); };
-  $("startBackBtn").onclick = () => { onBack(); };
+  $("soloBtn").onclick = () => { if (!busy) onSolo(); };
+  $("startBackBtn").onclick = () => { if (!busy) onBack(); };
 
   // ---------- 열고 닫기 ----------
   const behind = () => [document.querySelector("main"), document.querySelector("aside")];
@@ -118,6 +127,7 @@ export function initStart({ local, remote, onSolo, onEntered, onBack }) {
       }
       if (mode === "join") {
         if (code) { $("joinCode").value = ""; $("joinCode").value = cleanCodeInput(code); onCodeInput(); }
+        if (notice) setMsg("joinMsg", notice);   // 코드를 채우면 메시지가 지워지므로 안내는 그 뒤에
         ($("joinCode").value.length === 6 ? $("joinNick") : $("joinCode")).focus();
       } else {
         $("createGroupName").focus();

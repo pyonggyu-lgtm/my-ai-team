@@ -15,7 +15,7 @@ import { mountHistoryRoutes } from "./routes/history.js";
 
 const APP_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
-export async function createServer({ dbPath = ":memory:", now = () => new Date(), staticDir = null, rateLimit, createLimit, log = null } = {}) {
+export async function createServer({ dbPath = ":memory:", now = () => new Date(), staticDir = null, rateLimit, createLimit, joinLimit, log = null } = {}) {
   const db = openDb(dbPath, { now });
   const app = express();
   app.disable("x-powered-by");
@@ -30,6 +30,8 @@ export async function createServer({ dbPath = ":memory:", now = () => new Date()
   const limiter = createRateLimiter({ ...rateLimit, now }); // 초대 코드 틀린 시도
   // 그룹 만들기(인증 없음): 주소당 1시간에 5번, 맞든 틀리든 센다. 초대 limiter 와 별개.
   const createLimiter = createRateLimiter({ max: 5, windowMs: 60 * 60 * 1000, globalMax: Infinity, ...createLimit, now });
+  // 참여 성공: 주소당 1시간에 30번. 초대 틀린 시도 limiter 와 별개.
+  const joinLimiter = createRateLimiter({ max: 30, windowMs: 60 * 60 * 1000, globalMax: Infinity, ...joinLimit, now });
   const auth = requireMember({
     findMemberByTokenHash: db.findMemberByTokenHash,
     getGroup: db.getGroup,
@@ -38,7 +40,11 @@ export async function createServer({ dbPath = ":memory:", now = () => new Date()
 
   // 요청 기록은 메서드·경로(쿼리 제외)·상태 코드만. 초대 코드는 경로에 있으므로 가린다.
   const pathOf = req => req.originalUrl.split("?")[0]; // 쿼리 제외, 마운트 경로 포함
-  const safePath = p => p.replace(/^\/api\/invites\/[^/]*/, "/api/invites/***");
+  // 대소문자·연속 슬래시를 바꿔 써도(/API/Invites/…, /api//invites/…) 초대 코드는 남기지 않는다.
+  const safePath = p => {
+    const n = p.toLowerCase().replace(/\/{2,}/g, "/");
+    return n.startsWith("/api/invites/") ? n.replace(/^\/api\/invites\/[^/]*/, "/api/invites/***") : p;
+  };
   if (log) app.use((req, res, next) => {
     res.on("finish", () => log(`${req.method} ${safePath(pathOf(req))} ${res.statusCode}`));
     next();
@@ -46,9 +52,11 @@ export async function createServer({ dbPath = ":memory:", now = () => new Date()
 
   const smallJson = express.json({ limit: "16kb" });
   const bigJson = express.json({ limit: "1mb" }); // 그룹 만들 때 옮기는 기록 때문
-  app.use((req, res, next) => (req.method === "POST" && req.path === "/api/groups" ? bigJson : smallJson)(req, res, next));
+  // 그룹 만들기는 라우트 안에서 (생성 제한 → bigJson) 순서로 읽는다 → 막힌 주소는 본문을 읽지 않는다.
+  const isCreate = req => req.method === "POST" && /^\/api\/groups\/?$/i.test(req.path);
+  app.use((req, res, next) => (isCreate(req) ? next() : smallJson(req, res, next)));
 
-  const ctx = { db, now, realtime, requireMember: auth, limiter, createLimiter };
+  const ctx = { db, now, realtime, requireMember: auth, limiter, createLimiter, joinLimiter, bigJson };
   mountGroupRoutes(app, ctx);
   mountBoardRoutes(app, ctx);
   mountHistoryRoutes(app, ctx);

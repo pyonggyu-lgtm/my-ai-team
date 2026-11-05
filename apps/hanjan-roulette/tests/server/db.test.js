@@ -178,7 +178,7 @@ test("확정: 새로 → ok, 이미 있고 overwrite=false → existing, overwri
 
   const c2 = db.confirm({ boardId: b.id, date: TODAY, name: "돈가스", memberId: m2.id, overwrite: false, confirmedAt: "2026-11-05T03:00:02.000Z" });
   assert.equal(c2.ok, false);
-  assert.deepEqual(c2.existing, { name: "국밥", nickname: "하나", confirmedAt: "2026-11-05T03:00:01.000Z" });
+  assert.deepEqual(c2.existing, { name: "국밥", nickname: "하나", confirmedAt: "2026-11-05T03:00:01.000Z", date: TODAY });
   assert.equal(db.boardView(b.id, TODAY).confirmed.name, "국밥");
 
   const r0 = rev(b.id);
@@ -491,4 +491,15 @@ test("[C권고5] 메뉴 자리 번호는 넣기·지우기 때 0부터 다시 �
   const v2 = db.addItem({ boardId: b.id, name: "둘째", sortOrder: 1 });
   assert.equal(v2.items[1].name, "둘째");
   assert.deepEqual(v2.items.map(i => i.sortOrder), v2.items.map((_, k) => k));
+});
+
+test("[D-2⑥] addMember: 활성 멤버 30명이 넘으면 LIMIT_REACHED, 나간 멤버는 세지 않는다", () => {
+  const { group } = mkGroup();
+  const ids = [];
+  for (let i = 1; i < 30; i++) ids.push(db.addMember({ groupId: group.id, nickname: "m" + i, tokenHash: hash() }).id);
+  assert.equal(db.memberCount(group.id), 30);
+  assert.throws(() => db.addMember({ groupId: group.id, nickname: "x", tokenHash: hash() }), e => e.code === "LIMIT_REACHED" && e.message === "이 그룹은 30명까지 들어올 수 있어요.");
+  db.leaveMember({ groupId: group.id, memberId: ids[0] });
+  db.addMember({ groupId: group.id, nickname: "x", tokenHash: hash() });
+  assert.equal(db.memberCount(group.id), 30);
 });

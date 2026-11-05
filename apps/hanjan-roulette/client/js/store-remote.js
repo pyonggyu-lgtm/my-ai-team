@@ -144,9 +144,10 @@ export function createRemoteStore({
   let refreshing = null;
   let skipFlushOnce = false;
   // GET /state — 동시에 하나만. 접속·재접속·돌아왔을 때·자정마다 부른다.
-  function refresh() {
+  // force: 이미 가는 중인 요청이 있어도 합치지 않고 그것이 끝난 뒤 새로 받는다(소켓 connect 직후 — 그 사이 놓친 것을 확실히)
+  function refresh({ force = false } = {}) {
     if (!session.token || !session.groupId) return Promise.resolve({ ok: false, code: "SIGNED_OUT" });
-    if (refreshing) return refreshing;
+    if (refreshing) return force ? refreshing.then(() => refresh()) : refreshing;
     refreshing = (async () => {
       const r = await api.state(session.groupId);
       if (!r.ok) {
@@ -167,15 +168,29 @@ export function createRemoteStore({
       sortBoards();
       saveCache();
       if (JSON.stringify([cache.boards, cache.members, cache.group, cache.me, cache.day]) !== before) changed();
+      emit({ type: "synced" }); // 서버가 이 로그인을 확인해 줬다(처음 한 번이 필요한 쪽을 위해)
       if (skipFlushOnce) skipFlushOnce = false; else flushOutbox(); // 5xx 로 멈춰 있던 항목도 다음 refresh 때 다시 보낸다
       return r;
     })().finally(() => { refreshing = null; });
     return refreshing;
   }
 
+  // 소켓 없이 자정을 넘겼으면(오늘 ≠ 마지막으로 받은 날) 서버 상태를 다시 받는다. 같은 조합은 30초에 한 번만
+  // (기기 시계가 서버와 달라 계속 어긋나도 요청이 쏟아지지 않게).
+  let dayCheck = { key: "", at: 0 };
+  function refreshIfNewDay() {
+    if (!session.token || !cache.day || !canWork()) return;
+    const t = today();
+    if (t === cache.day) return;
+    const key = `${t}|${cache.day}`, at = now().getTime();
+    if (dayCheck.key === key && at - dayCheck.at < 30_000) return;
+    dayCheck = { key, at };
+    refresh().catch(() => {});
+  }
+
   // ───────── 대기열 보내기 ─────────
   const myNickname = () => cache.me?.nickname ?? readDevice().nickname ?? "";
-  // item → { status, ... }   direct=true 면 date 를 보내지 않는다(서버가 오늘로 정함)
+  // item → { status, ... }   확정은 직접 보낸 것이든 대기열이든 언제나 "누른 날"(item.date)을 함께 보낸다.
   const directIds = new Set();      // 사용자가 방금 눌러 결과를 기다리는 항목(저장되지 않음 — 앱을 껐다 켜면 일반 대기열 항목)
   const itemResults = new Map();    // 바로 보낸 항목의 결과(누른 쪽이 가져간다)
   let conflictItemId = null;
@@ -183,7 +198,7 @@ export function createRemoteStore({
     const direct = directIds.has(item.id);
     let r;
     if (item.type === "confirm") {
-      r = await api.confirm(item.boardId, { name: item.name, overwrite: !!item.overwrite, ...(direct ? {} : { date: item.date }) }); // 바로 보내는 확정은 서버가 오늘로 정한다
+      r = await api.confirm(item.boardId, { name: item.name, overwrite: !!item.overwrite, date: item.date }); // 23:59:59 에 누른 것이 서버에 닿을 때 다음 날이어도 누른 날로 기록된다
     } else {
       // 넘김은 서버가 "오늘" 기준으로 기록한다 → 누른 날이 지났으면 의미가 없으니 버린다
       if (!direct && item.date && item.date !== today()) return { status: "dropped", reason: "STALE", silent: true };
@@ -341,7 +356,7 @@ export function createRemoteStore({
     socket.on("connect", async () => {
       socketUp = true;
       syncConnection();
-      await refresh();     // 놓친 이벤트는 따로 챙기지 않고 전체를 다시 받는다
+      await refresh({ force: true });     // 놓친 이벤트는 따로 챙기지 않고 전체를 다시 받는다
       flushOutbox();
     });
     socket.on("disconnect", reason => {
@@ -380,7 +395,14 @@ export function createRemoteStore({
       if (it.boardId !== b.id) continue;
       if (it.type === "skipAdd" && (!it.date || it.date === day) && !view.skipped.includes(it.name)) view.skipped.push(it.name);
       if (it.type === "skipClear" && (!it.date || it.date === day)) view.skipped = [];
-      if (it.type === "confirm" && it.date === day) view.confirmed = { name: it.name, nickname: myNickname(), confirmedAt: now().toISOString() };
+      if (it.type === "confirm") {
+        if (it.date === day) { // 오늘 확정: 오늘 넘김도 비워진다(서버가 한 트랜잭션으로 하는 것과 같게)
+          view.confirmed = { name: it.name, nickname: myNickname(), confirmedAt: now().toISOString() };
+          view.skipped = [];
+        } else if (it.date === addDays(day, -1)) { // 누른 뒤 자정을 넘김: 어제 메뉴
+          view.yesterday = it.name;
+        }
+      }
     }
     return view;
   }
@@ -446,6 +468,7 @@ export function createRemoteStore({
   // 연결돼 있으면 이 항목의 결과를 기다려 돌려주고(409 는 ALREADY_CONFIRMED), 끊겼거나 서버가 막히면 대기열에 남기고 queued 로 알린다.
   async function queued(type, boardId, extra = {}) {
     if (!cache.boards.some(b => b.id === boardId)) return NOT_FOUND();
+    refreshIfNewDay();
     const entry = outbox.push({ type, boardId, date: today(), ...extra });
     const waitForResult = canWork() && !awaitingDecision;
     if (waitForResult) directIds.add(entry.id);
@@ -473,6 +496,7 @@ export function createRemoteStore({
     // ───── 1단계 저장소 약속 ─────
     async getState() {
       if (session.token && cache.boards.length === 0) await refresh();
+      else refreshIfNewDay();
       return toLocalState();
     },
     async getDevice() {

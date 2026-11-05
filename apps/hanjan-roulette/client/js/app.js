@@ -6,7 +6,7 @@ import { createLocalStore, getBrowserStorage } from "./store-local.js";
 import { createRemoteStore } from "./store-remote.js";
 import { TEMPLATES, MAX_ITEMS } from "./templates.js";
 import { withRo } from "./josa.js";
-import { joinParam } from "./start-logic.js";
+import { joinParam, isOtherGroupLink, ALREADY_IN_GROUP } from "./start-logic.js";
 import { initBoardEditor } from "./views/board-editor.js";
 import { initHistory } from "./views/history.js";
 import { initStart } from "./views/start.js";
@@ -274,7 +274,7 @@ const later_ = [];
 const noticeBlocked = () => spinning || starting || $("overlay").classList.contains("show") || !!document.querySelector("dialog[open]") || startView.isOpen();
 function later(fn) { if (noticeBlocked()) later_.push(fn); else fn(); }
 function flushLater() { while (later_.length && !noticeBlocked()) later_.shift()(); }
-document.addEventListener("close", flushLater, true);   // dialog 의 close 는 퍼지지 않아 capture 로 듣는다
+document.addEventListener("close", () => setTimeout(flushLater, 0), true);   // dialog 의 close 는 퍼지지 않아 capture 로 듣는다
 
 // 남이 확정했다는 짧은 알림(8초)
 let peerTimer = 0;
@@ -338,6 +338,7 @@ function onStoreEvent(e) {
       markStale();
       break;
     case "signedOut": signedOut(e.reason); break;
+    case "synced": checkInviteLink(); break;   // 첫 서버 확인 — 화면은 다시 그리지 않는다
     default: markStale();   // changed · 혼자 쓰기의 다른 탭 storage 이벤트
   }
 }
@@ -374,6 +375,14 @@ async function showStart(opts = {}) {
   await startView.show({ ...opts, canGoBack });
 }
 // 그룹에서 나갔거나 로그인 정보가 사라졌을 때
+let joinFromLink = null;   // 링크의 초대 코드 — 서버가 로그인을 확인해 줄 때까지(signedOut 이나 synced) 보관
+// 첫 서버 확인(GET /state 성공 · 소켓 connect 뒤의 refresh)이 끝났다: 로그인이 유효하니 다른 그룹 링크면 알려 준다.
+async function checkInviteLink() {
+  const code = joinFromLink; joinFromLink = null;
+  if (!code || kind !== "group") return;
+  const group = await remote.getGroup();
+  if (group && isOtherGroupLink(code, group)) later(() => { if (kind === "group") showToast(ALREADY_IN_GROUP); });
+}
 async function signedOut(reason) {
   unsub(); remote.stop();
   kind = null; showBar(false); clearTimeout(connTimer);
@@ -384,7 +393,10 @@ async function signedOut(reason) {
   await local.setMode(null);
   S = { today: "", boards: [], skipped: {}, history: {} }; curId = null;
   render();
-  await showStart({ mode: "create", canGoBack: false,
+  later_.length = 0;                                 // 이 그룹에서 미뤄 둔 알림은 버린다
+  // 초대 링크로 열었는데 첫 서버 확인 전에 로그아웃됐으면(무효 토큰) 그 코드로 참여 탭
+  const code = reason === "LEFT" || reason === "MANUAL" ? null : joinFromLink; joinFromLink = null;
+  await showStart({ mode: code ? "join" : "create", code: code ?? "", canGoBack: false,
     notice: reason === "LEFT" || reason === "MANUAL" ? "" : "그룹에서 나갔거나 연결 정보가 사라졌어요. 다시 참여해 주세요." });
 }
 
@@ -403,7 +415,12 @@ $("groupBtn").onclick = () => {
 (async () => {
   const sess = await local.getSession();
   const joinCode = joinParam(location.search);
-  if (sess.signedIn) { if (joinCode !== null) cleanUrl(); await enterGroup(); return; }   // 이미 그룹에 들어 있으면 초대 주소는 무시
+  if (sess.signedIn) {   // 이미 그룹에 들어 있으면 초대 주소로는 옮겨 가지 않는다(다른 그룹이면 알려 준다)
+    if (joinCode !== null) cleanUrl();
+    joinFromLink = joinCode || null;
+    await enterGroup();   // 캐시가 있으면 서버 확인을 기다리지 않고 돌아온다 → 코드는 synced/signedOut 이 올 때까지 둔다
+    return;
+  }
   if (joinCode !== null) { await showStart({ mode: "join", code: joinCode }); return; }
   if ((await local.getMode()) === "solo") { await enterSolo(); return; }
   await showStart({ mode: "create", canGoBack: false });

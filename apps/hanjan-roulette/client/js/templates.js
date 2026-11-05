@@ -3,6 +3,7 @@
 export const MAX_ITEMS = 16;
 export const MAX_ITEM_NAME = 20;
 export const MAX_BOARDS = 10;
+export const MAX_MEMBERS = 30; // 그룹당 활성 멤버
 export const MAX_BOARD_NAME = 12;
 export const MAX_RESULT_LEAD = 20;
 

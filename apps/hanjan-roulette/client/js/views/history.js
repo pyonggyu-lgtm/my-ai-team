@@ -115,6 +115,7 @@ export function initHistory({ store, getBoards, getCurrentId, getToday, isBusy =
   $("historyBtn").addEventListener("click", async () => {
     if (dlg.open || isBusy()) return;           // 회전 중에는 열지 않는다
     const boards = getBoards();
+    if (!boards.length) return;                 // 메뉴판이 하나도 없으면(그룹 연결 전 등) 열 것이 없다
     boardId = boards.some(b => b.id === getCurrentId()) ? getCurrentId() : boards[0].id;
     range = 30; shown = []; hasMore = false; pages = 1;
     renderChips(); renderRange();

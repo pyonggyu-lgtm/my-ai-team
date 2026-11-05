@@ -3,18 +3,18 @@
   "history": {
     "entries": [
       {
-        "date": "2026-11-05",
-        "name": "라면집",
+        "date": "2026-11-06",
+        "name": "제육볶음",
         "nickname": "에이",
-        "confirmedAt": "2026-11-05T14:36:32.005Z"
+        "confirmedAt": "2026-11-05T18:59:45.449Z"
       }
     ],
     "hasMore": false,
-    "oldest": "2026-11-05"
+    "oldest": "2026-11-06"
   },
   "stats": [
     {
-      "name": "라면집",
+      "name": "제육볶음",
       "count": 1
     }
   ]

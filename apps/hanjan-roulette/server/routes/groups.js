@@ -1,6 +1,6 @@
 // 그룹·초대·멤버 API (설계 4.2 단계 2).
 import { ApiError, bad, bodyObject, str, bool, validDate } from "../http.js";
-import { newToken, hashToken, newInviteCode, normalizeInviteCode, isValidInviteCode, rateLimitMiddleware, countedRateLimitMiddleware } from "../auth.js";
+import { newToken, hashToken, newInviteCode, normalizeInviteCode, isValidInviteCode, rateLimitMiddleware, countedRateLimitMiddleware, successLimitMiddleware } from "../auth.js";
 import { todayKST } from "../../client/js/kst.js";
 import { TEMPLATES, TEMPLATE_IDS, MAX_ITEMS, MAX_ITEM_NAME, MAX_BOARDS, MAX_BOARD_NAME, MAX_RESULT_LEAD } from "../../client/js/templates.js";
 
@@ -50,13 +50,12 @@ function parseImport(raw, nowIso, today) {
   });
 }
 
-export function mountGroupRoutes(app, { db, now, realtime, requireMember, limiter, createLimiter }) {
+export function mountGroupRoutes(app, { db, now, realtime, requireMember, limiter, createLimiter, joinLimiter, bigJson }) {
   const by = req => ({ memberId: req.member.id, nickname: req.member.nickname });
   const limit = rateLimitMiddleware(limiter);
   const groupInfo = g => ({ id: g.id, name: g.name, inviteCode: g.inviteCode });
 
-  // 활성 멤버가 0명인 그룹은 닫힌 것으로 보고 없는 코드와 같은 응답(데이터는 지우지 않음)
-  // 없는 코드·형식이 틀린 코드·활성 멤버 0명 그룹은 모두 같은 404 이고 틀린 시도로 센다(데이터는 지우지 않음).
+  // 없는 코드·형식이 틀린 코드·활성 멤버 0명 그룹은 모두 같은 404. 없는 코드와 활성 멤버 0명 그룹만 틀린 시도로 센다(형식 오류는 세지 않음). 데이터는 지우지 않음.
   const openGroupByCode = (req, rawCode) => {
     const code = normalizeInviteCode(rawCode);
     // 형식이 틀린 입력은 진짜 코드일 수 없으므로 DB 조회 없이 404, 틀린 시도로 세지 않는다(어르신 오타로 막히지 않게)
@@ -74,7 +73,7 @@ export function mountGroupRoutes(app, { db, now, realtime, requireMember, limite
     res.json({ ok: true, now: d.toISOString(), today: todayKST(d) });
   });
 
-  app.post("/api/groups", countedRateLimitMiddleware(createLimiter), (req, res) => {
+  app.post("/api/groups", countedRateLimitMiddleware(createLimiter), bigJson, (req, res) => {
     const body = bodyObject(req);
     const name = str(body, "name", "그룹 이름", MAX_GROUP_NAME);
     const nickname = str(body, "nickname", "닉네임", MAX_NICKNAME);
@@ -93,12 +92,13 @@ export function mountGroupRoutes(app, { db, now, realtime, requireMember, limite
     res.json({ groupName: g.name, memberCount: db.memberCount(g.id) });
   });
 
-  app.post("/api/invites/:code/join", limit, (req, res) => {
+  app.post("/api/invites/:code/join", limit, successLimitMiddleware(joinLimiter), (req, res) => {
     const g = openGroupByCode(req, req.params.code);
     const nickname = str(bodyObject(req), "nickname", "닉네임", MAX_NICKNAME);
     const token = newToken();
     const m = db.addMember({ groupId: g.id, nickname, tokenHash: hashToken(token) });
     const member = { id: m.id, nickname: m.nickname, isOwner: false, joinedAt: m.joinedAt };
+    req.recordSuccess();
     realtime.emit(g.id, "member:joined", { member }, { memberId: m.id, nickname: m.nickname });
     res.status(201).json({ group: groupInfo(g), member, token });
   });
