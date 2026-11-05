@@ -5,7 +5,36 @@ export const EXE = "/home/claude/agents/minjun/.cache/ms-playwright/chromium-122
 export const ORIG = "file:///workspace/apps/hanjan-roulette/docs/reference/점심메뉴_룰렛.html";
 export const NEW = `http://localhost:${process.env.PORT || 8080}/`;
 export const CAP = "/workspace/apps/hanjan-roulette/docs/design/0단계_캡처";
-export const KEY = "lunchRoulette.v1.";
+export const KEY = "lunchRoulette.v1.";   // 원본(점심메뉴_룰렛.html) 쪽 localStorage 접두어
+export const KEY_NEW = "hanjan.v1.";       // 1단계 새 화면 쪽 접두어
+
+// 원본 형식(items=[{name,on}], history=[{date,name}], skipped={date,names}, sound)을 두 화면 어디서든 같은 모양으로 읽고 쓰는 어댑터.
+// 새 화면은 첫 번째 메뉴판(점심)의 값을 원본 모양으로 바꿔 돌려준다. 값이 없으면 null(원본 localStorage.getItem 과 같게).
+export const isOrig = url => url === ORIG;
+
+export function readKey(page, url, key) {
+  if (isOrig(url)) return page.evaluate(([a, b]) => localStorage.getItem(a + b), [KEY, key]);
+  return page.evaluate(([p, key]) => {
+    const g = k => { try { return JSON.parse(localStorage.getItem(p + k)); } catch { return null; } };
+    const boards = g("boards"), b = Array.isArray(boards) && boards[0];
+    if (key === "items") return b ? JSON.stringify(b.items.map(i => ({ name: i.name, on: i.on }))) : null;
+    if (key === "history") { const h = g("history"); const l = b && h && h[b.id]; return l && l.length ? JSON.stringify(l.map(e => ({ date: e.date, name: e.name }))) : null; }
+    if (key === "skipped") { const s = g("skipped"); const v = b && s && s[b.id]; return v ? JSON.stringify({ date: v.date, names: v.names }) : null; }
+    if (key === "sound") { const d = g("device"); return d && typeof d.sound === "boolean" ? String(d.sound) : null; }
+    return null;
+  }, [KEY_NEW, key]);
+}
+
+// 시험용 초기 메뉴(원본 items 모양 [{name,on}])를 해당 화면 형식으로 저장한다. (페이지가 열린 뒤 호출 → reload 필요)
+export function seedItems(page, url, items) {
+  if (isOrig(url)) return page.evaluate(([k, v]) => { localStorage.clear(); localStorage.setItem(k + "items", JSON.stringify(v)); }, [KEY, items]);
+  return page.evaluate(([k, v]) => {
+    localStorage.clear();
+    const board = { id: "b-lunch", name: "점심", resultLead: "오늘 점심은", template: "lunch", excludeYesterday: true, sortOrder: 0,
+      items: v.map((x, i) => ({ id: "i" + i, name: x.name, on: x.on !== false })) };
+    localStorage.setItem(k + "boards", JSON.stringify([board]));
+  }, [KEY_NEW, items]);
+}
 
 export const launch = () =>
   chromium.launch({ executablePath: EXE, args: ["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"] });

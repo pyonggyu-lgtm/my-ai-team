@@ -3,12 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>점심 메뉴 룰렛</title>
+<title>한잔메뉴룰렛</title>
 <link rel="preload" href="fonts/Pretendard-Bold.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <main>
+  <div id="boardBar">
+    <div id="boardTabs" aria-label="메뉴판"></div>
+    <button type="button" id="addBoardBtn" aria-label="새 메뉴판 만들기">+</button>
+    <button type="button" id="historyBtn">기록</button>
+  </div>
   <div id="today"></div>
   <div id="wheelWrap"><canvas id="wheel" width="900" height="900"></canvas></div>
   <div id="notice"></div>
@@ -28,6 +33,7 @@
     <button id="snd" type="button">소리 꺼짐</button>
     <button id="resetBtn" type="button">처음 메뉴로 되돌리기</button>
   </div>
+  <button type="button" id="boardSettingsBtn">메뉴판 설정</button>
 </aside>
 
 <div id="toast"></div>
@@ -35,7 +41,7 @@
 <div id="overlay">
   <canvas id="confetti"></canvas>
   <div id="card">
-    <div class="lead">오늘 점심은</div>
+    <div class="lead" id="resultLead">오늘 점심은</div>
     <div class="menu" id="resultName"></div>
     <div>
       <button id="okBtn">이걸로 확정</button>
@@ -44,6 +50,71 @@
     <button id="closeBtn">닫기</button>
   </div>
 </div>
+
+<dialog id="boardDialog" class="dlg" aria-labelledby="boardDialogTitle">
+  <form id="boardForm" class="dlg-body" autocomplete="off" novalidate>
+    <h2 id="boardDialogTitle">새 메뉴판</h2>
+
+    <div class="field">
+      <label for="boardName">메뉴판 이름</label>
+      <input type="text" id="boardName" maxlength="12" aria-describedby="boardNameHint">
+      <div class="field-hint" id="boardNameHint">12자까지 쓸 수 있어요.</div>
+    </div>
+
+    <div class="field">
+      <label for="boardLead">결과에 보여 줄 말</label>
+      <input type="text" id="boardLead" maxlength="20" aria-describedby="boardLeadHint">
+      <div class="field-hint" id="boardLeadHint">돌린 뒤 메뉴 위에 나와요. 예: 오늘 점심은</div>
+    </div>
+
+    <fieldset id="templateField">
+      <legend>처음에 넣을 메뉴</legend>
+      <label class="choice"><input type="radio" name="template" value="lunch" checked>
+        <span><b>점심</b><small>김치찌개, 제육볶음 등 8개</small></span></label>
+      <label class="choice"><input type="radio" name="template" value="drinks">
+        <span><b>술 한잔</b><small>고깃집, 치킨집 등 8곳</small></span></label>
+      <label class="choice"><input type="radio" name="template" value="empty">
+        <span><b>빈 메뉴판</b><small>메뉴 없이 시작해요</small></span></label>
+    </fieldset>
+
+    <label class="choice switch">
+      <input type="checkbox" id="boardExclude" checked>
+      <span><b>어제 먹은 메뉴는 빼기</b><small>끄면 어제 먹은 메뉴도 다시 나와요</small></span>
+    </label>
+
+    <div id="boardMsg" role="alert"></div>
+
+    <div class="dlg-actions">
+      <button type="button" id="boardDeleteBtn" class="btn btn-danger" hidden>이 메뉴판 지우기</button>
+      <button type="button" id="boardCancelBtn" class="btn btn-sub">취소</button>
+      <button type="submit" id="boardSaveBtn" class="btn btn-main">저장</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="historyDialog" class="dlg" aria-labelledby="historyTitle">
+  <div class="dlg-head">
+    <h2 id="historyTitle">기록</h2>
+    <button type="button" id="historyCloseBtn" class="btn btn-sub">닫기</button>
+  </div>
+  <div class="dlg-body">
+    <div id="historyBoards" class="chips" aria-label="메뉴판 고르기"></div>
+
+    <h3 id="statsTitle">많이 나온 메뉴</h3>
+    <div id="rangeBtns" class="seg" aria-label="기간">
+      <button type="button" data-range="30" aria-pressed="true">30일</button>
+      <button type="button" data-range="90" aria-pressed="false">90일</button>
+      <button type="button" data-range="all" aria-pressed="false">전체</button>
+    </div>
+    <ul id="statsList" class="bars" aria-labelledby="statsTitle"></ul>
+    <p id="statsEmpty" class="empty-msg" hidden>이 기간에는 확정한 메뉴가 없어요.</p>
+
+    <h3 id="historyListTitle">날짜별 기록</h3>
+    <ul id="historyList" class="h-list" aria-labelledby="historyListTitle"></ul>
+    <p id="historyEmpty" class="empty-msg" hidden>아직 기록이 없어요. 돌려서 확정하면 여기에 쌓여요.</p>
+    <button type="button" id="historyMore" class="btn btn-sub" hidden>더 보기 (30일 더)</button>
+  </div>
+</dialog>
 
 <script type="module" src="js/app.js"></script>
 </body>

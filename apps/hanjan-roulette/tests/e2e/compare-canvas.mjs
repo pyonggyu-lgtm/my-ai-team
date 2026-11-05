@@ -1,6 +1,6 @@
 // 시험 C: 원본과 새 화면의 #wheel 캔버스(toDataURL) 픽셀 비교, 4상태.
 import fs from "node:fs";
-import { launch, open, settle, pixelDiff, ORIG, NEW, CAP, KEY } from "./_lib.mjs";
+import { launch, open, settle, pixelDiff, ORIG, NEW, CAP, seedItems } from "./_lib.mjs";
 
 const DEFAULT8 = ["김치찌개", "제육볶음", "돈가스", "짜장면", "국밥", "비빔밥", "햄버거", "샐러드"];
 const EXTRA4 = ["떡볶이", "초밥", "쌀국수", "칼국수"];
@@ -18,7 +18,7 @@ const browser = await launch();
 
 async function grab(url, items) {
   const { ctx, page } = await open(browser, url);
-  await page.evaluate(([k, v]) => { localStorage.clear(); localStorage.setItem(k + "items", JSON.stringify(v)); }, [KEY, items]);
+  await seedItems(page, url, items);
   await page.reload({ waitUntil: "load" });
   await settle(page, 600);
   const out = await page.evaluate(() => ({ url: document.getElementById("wheel").toDataURL(), n: document.querySelectorAll("#list li").length, notice: document.getElementById("notice").textContent, texts: window.__texts }));

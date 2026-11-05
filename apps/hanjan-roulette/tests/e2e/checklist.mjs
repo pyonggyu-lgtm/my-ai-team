@@ -1,7 +1,7 @@
 // 시험 D: 동작 점검표 23항목. 원본·새 화면에서 같은 절차를 실행해 관측값을 비교한다.
 // 결과: tests/e2e/0단계_점검표.md, docs/design/0단계_캡처/D_result.json
 import fs from "node:fs";
-import { launch, open, settle, ORIG, NEW, CAP, KEY } from "./_lib.mjs";
+import { launch, open, settle, ORIG, NEW, CAP, readKey } from "./_lib.mjs";
 
 fs.mkdirSync(CAP, { recursive: true });
 const browser = await launch();
@@ -13,7 +13,7 @@ async function run(url, tag) {
   const errors = [];
   const names = p => p.$$eval("#list li", l => l.map(li => li.querySelector(".name").textContent));
   const tags = p => p.$$eval("#list li", l => l.map(li => li.querySelector(".tag").textContent));
-  const ls = (p, k) => p.evaluate(([a, b]) => localStorage.getItem(a + b), [KEY, k]);
+  const ls = (p, k) => readKey(p, url, k);
   const ev = p => p.evaluate(() => window.__ev);
   const shot = (p, n) => p.screenshot({ path: `${CAP}/D-${n}-${tag}.png` });
   const waitShow = p => p.waitForSelector("#overlay.show", { timeout: 12000 });

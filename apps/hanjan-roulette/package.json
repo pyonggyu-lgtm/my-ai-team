@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "start": "node tools/serve.mjs",
-    "test": "node --test \"tests/unit/*.test.js\""
+    "test": "node --test \"tests/unit/*.test.js\"",
+    "test:tz": "TZ=Asia/Seoul npm test && TZ=America/Los_Angeles npm test && TZ=UTC npm test"
   }
 }

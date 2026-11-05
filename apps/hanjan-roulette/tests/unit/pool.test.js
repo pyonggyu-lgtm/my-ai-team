@@ -94,3 +94,22 @@ test("itemTag 우선순위: 확정 > 넘김 > 어제", () => {
 test("itemTag: 꺼진 메뉴는 태그 없음", () => {
   assert.equal(itemTag({ name: "가", on: false }, { confirmed: "가", skippedNames: ["가"], yesterday: "가" }), "");
 });
+
+// ---- 1단계 추가분: excludeYesterday:false ----
+test("excludeYesterday:false → 어제 메뉴가 후보에 남는다", () => {
+  const r = computePool({ items: mk(["가", "나", "다"]), skippedNames: [], yesterday: "나", excludeYesterday: false });
+  assert.deepEqual(r, { pool: ["가", "나", "다"], msg: "" });
+});
+test("excludeYesterday:false → 어제 메뉴 때문에 '부족해서' 문구가 붙지 않는다", () => {
+  const r = computePool({ items: mk(["가", "나"]), skippedNames: [], yesterday: "나", excludeYesterday: false });
+  assert.deepEqual(r, { pool: ["가", "나"], msg: "" });
+});
+test("excludeYesterday:false → 태그 '어제 먹음'이 없다(yesterday:null을 넘기는 약속)", () => {
+  const item = { name: "나", on: true };
+  assert.equal(itemTag(item, { confirmed: null, skippedNames: [], yesterday: null }), "");
+  assert.equal(itemTag(item, { confirmed: null, skippedNames: [], yesterday: "나" }), "어제 먹음"); // 켜진 메뉴판 대조
+});
+test("excludeYesterday:false 이고 모두 넘김 → 문구에 '어제' 안내 없음", () => {
+  const r = computePool({ items: mk(["가", "나"]), skippedNames: ["가", "나"], yesterday: "나", excludeYesterday: false });
+  assert.deepEqual(r, { pool: ["가", "나"], msg: "모든 메뉴를 한 번씩 넘겨서 처음부터 다시 돌려요.", resetSkipped: true });
+});

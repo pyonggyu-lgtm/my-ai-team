@@ -83,3 +83,103 @@
   @media (prefers-reduced-motion:reduce) {
     #overlay.show #card { animation:none; }
   }
+
+  /* ---- 1단계 ---- */
+  /* 위 원본 규칙은 고치지 않는다. 아래는 모두 새 요소 전용. 글씨 18px 이상(1.125rem, 루트 16px 기준), 누르는 곳 높이 48px 이상. */
+
+  /* 메뉴판 줄: main 맨 위 */
+  #boardBar { width:100%; display:flex; align-items:center; gap:.5rem; margin-bottom:.8rem; flex:none; }
+  #boardTabs { flex:1 1 auto; min-width:0; display:flex; gap:.5rem; overflow-x:auto; overflow-y:hidden; padding:.2rem .2rem; margin:-.2rem 0; scroll-snap-type:x proximity; scrollbar-width:thin; scrollbar-color:#3a4f73 transparent; -webkit-overflow-scrolling:touch; }
+  .tab { flex:0 0 auto; scroll-snap-align:center; min-height:48px; max-width:11rem; padding:0 1.1rem; border:1px solid #3a4f73; border-radius:24px; background:transparent; color:var(--paper); font-size:1.125rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; transition:background .15s, border-color .15s; }
+  .tab:hover { background:#1b2c49; border-color:#5a7099; }
+  .tab[aria-current="true"] { background:var(--paper); border-color:var(--paper); color:var(--navy); }
+  .tab[aria-current="true"]:hover { background:#fff; }
+  #addBoardBtn, #historyBtn { flex:0 0 auto; min-height:48px; border:1px solid #3a4f73; border-radius:24px; background:var(--navy-deep); color:var(--paper); font-weight:700; cursor:pointer; transition:background .15s, border-color .15s; }
+  #addBoardBtn { min-width:48px; padding:0; font-size:1.7rem; line-height:1; }
+  #historyBtn { padding:0 1.1rem; font-size:1.125rem; }
+  #addBoardBtn:hover, #historyBtn:hover { background:#1b2c49; border-color:#5a7099; }
+  body.busy #boardBar { pointer-events:none; opacity:.5; }
+
+  /* 대화창 공통 (<dialog>) */
+  .dlg { padding:0; border:0; border-radius:16px; background:var(--paper); color:var(--navy); width:min(34rem,calc(100vw - 2rem)); max-height:calc(100dvh - 2rem); overflow:auto; box-shadow:0 1.5rem 4rem rgba(0,0,0,.5); }
+  .dlg::backdrop { background:rgba(10,18,32,.8); }
+  .dlg :focus-visible { outline-color:var(--navy); }
+  .dlg button { font:inherit; }
+  .dlg-body { padding:1.4rem 1.4rem 1.2rem; }
+  .dlg h2 { margin:0 0 1rem; font-size:1.5rem; font-weight:700; }
+  .dlg h3 { margin:1.4rem 0 .6rem; font-size:1.25rem; font-weight:700; }
+  .dlg-head { position:sticky; top:0; z-index:1; display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.9rem 1.4rem; background:var(--paper); border-bottom:1px solid #d8d0bd; }
+  .dlg-head h2 { margin:0; }
+  .btn { min-height:48px; padding:0 1.3rem; border:0; border-radius:12px; font-size:1.125rem; font-weight:700; cursor:pointer; transition:background .15s; }
+  .btn-main { background:var(--navy); color:#fff; }
+  .btn-main:hover { background:#2a3d5e; }
+  .btn-sub { background:transparent; color:var(--navy); box-shadow:inset 0 0 0 2px var(--navy); }
+  .btn-sub:hover { background:#e6e0d2; }
+  .btn-danger { background:transparent; color:#a93226; box-shadow:inset 0 0 0 2px #a93226; }
+  .btn-danger:hover { background:#f6dcd6; }
+
+  /* 메뉴판 관리 창 */
+  .field { margin-bottom:1.1rem; }
+  .field > label, fieldset legend { display:block; margin-bottom:.4rem; font-size:1.125rem; font-weight:700; padding:0; }
+  .field input[type=text] { width:100%; min-height:48px; padding:.5rem .8rem; border:2px solid #8a93a6; border-radius:10px; background:#fff; color:var(--navy); font:inherit; font-size:1.125rem; }
+  .field input[type=text]:focus-visible { outline:none; border-color:var(--navy); box-shadow:0 0 0 3px rgba(27,42,68,.25); }
+  .field-hint { margin-top:.3rem; font-size:1rem; color:#4a5a73; }
+  fieldset { margin:0 0 1.1rem; padding:0; border:0; min-width:0; }
+  .choice { display:flex; align-items:center; gap:.8rem; min-height:56px; margin-bottom:.5rem; padding:.5rem .9rem; border:2px solid #b9b3a3; border-radius:12px; background:#fff; cursor:pointer; font-size:1.125rem; }
+  .choice:has(input:checked) { border-color:var(--navy); background:#e8edf6; }
+  .choice:has(input:focus-visible) { outline:3px solid var(--navy); outline-offset:2px; }
+  .choice input { width:1.5rem; height:1.5rem; margin:0; flex:0 0 auto; accent-color:var(--navy); }
+  .choice b { display:block; }
+  .choice small { display:block; font-size:1rem; font-weight:500; color:#4a5a73; }
+  .choice.switch { margin-bottom:1.1rem; }
+  #boardMsg { min-height:1.6rem; margin-bottom:.6rem; font-size:1.125rem; font-weight:700; color:#a93226; }
+  .dlg-actions { display:flex; flex-wrap:wrap; gap:.6rem; justify-content:flex-end; }
+  #boardDeleteBtn { margin-right:auto; }
+  #boardDialog [hidden] { display:none; }
+
+  /* 기록 창 */
+  .chips, .seg { display:flex; flex-wrap:wrap; gap:.5rem; }
+  .chip, .seg button { min-height:48px; padding:0 1rem; border:2px solid var(--navy); border-radius:24px; background:transparent; color:var(--navy); font-size:1.125rem; font-weight:700; cursor:pointer; transition:background .15s; }
+  .chip:hover, .seg button:hover { background:#e6e0d2; }
+  .chip[aria-pressed="true"], .seg button[aria-pressed="true"] { background:var(--navy); color:#fff; }
+  .seg button { flex:1 1 0; border-radius:12px; }
+  #historyBoards { padding-top:1rem; }
+  .bars { list-style:none; margin:.8rem 0 0; padding:0; }
+  .bar-row { display:grid; grid-template-columns:minmax(0,1fr) auto; column-gap:.8rem; row-gap:.25rem; margin-bottom:.8rem; font-size:1.125rem; }
+  .bar-name { overflow-wrap:anywhere; font-weight:700; }
+  .bar-count { font-variant-numeric:tabular-nums; font-weight:700; }
+  .bar-track { grid-column:1 / -1; height:.9rem; border-radius:.45rem; background:#ddd5c2; overflow:hidden; }
+  .bar-fill { display:block; height:100%; width:var(--pct,0%); min-width:.45rem; border-radius:.45rem; background:var(--navy); }
+  .h-list { list-style:none; margin:0; padding:0; }
+  .h-row { display:flex; flex-wrap:wrap; align-items:baseline; gap:.2rem .8rem; padding:.7rem 0; border-bottom:1px solid #d8d0bd; font-size:1.125rem; }
+  .h-date { flex:0 0 8.5rem; color:#4a5a73; font-variant-numeric:tabular-nums; }
+  .h-menu { flex:1 1 8rem; min-width:0; font-weight:700; overflow-wrap:anywhere; }
+  .h-who { flex:0 0 auto; color:#4a5a73; }
+  .empty-msg { margin:.8rem 0; font-size:1.125rem; color:#4a5a73; }
+  #historyMore { display:block; width:100%; margin-top:1rem; }
+
+  /* 폭 860px 이하: 아래에서 올라오는 창 */
+  @media (max-width:860px) {
+    main { padding-top:.8rem; }
+    .dlg { width:100%; max-width:none; margin:auto 0 0; border-radius:16px 16px 0 0; max-height:92dvh; }
+    .dlg-body { padding:1.2rem 1rem 1.2rem; }
+    .dlg-head { padding:.8rem 1rem; }
+    .dlg-actions .btn { flex:1 1 40%; }
+    #boardDeleteBtn { flex-basis:100%; margin-right:0; order:-1; }
+    .h-date { flex-basis:100%; }
+  }
+  @media (prefers-reduced-motion:no-preference) {
+    #boardTabs { scroll-behavior:smooth; }
+    .dlg[open] { animation:rise .35s var(--ease-out) both; }
+  }
+  @media (prefers-reduced-motion:reduce) {
+    .tab, #addBoardBtn, #historyBtn, .btn, .chip, .seg button { transition:none; }
+  }
+
+  /* 메뉴판 설정 버튼: 메뉴 패널 맨 아래, #foot(소리·되돌리기) 아래 별도 줄. 회전 중에는 aside 전체가 잠기므로 따로 처리할 것 없음. */
+  #boardSettingsBtn { display:block; width:100%; min-height:48px; margin-top:.5rem; padding:0 1rem; border:1px solid #3a4f73; border-radius:8px; background:transparent; color:var(--paper); font-size:1.125rem; font-weight:700; cursor:pointer; transition:background .15s, border-color .15s; }
+  #boardSettingsBtn:hover { background:#1b2c49; border-color:#5a7099; }
+  @media (prefers-reduced-motion:reduce) { #boardSettingsBtn { transition:none; } }
+
+  /* #historyMore{display:block}가 hidden 속성을 이기는 문제 보정 */
+  #historyMore[hidden], #statsEmpty[hidden], #historyEmpty[hidden] { display:none; }
