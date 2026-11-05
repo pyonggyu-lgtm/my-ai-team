@@ -73,9 +73,16 @@ export const INIT = `(() => {
   document.addEventListener("click", e => { if (e.target && e.target.id === "againBtn") window.__againClick = performance.now(); }, true);
 })();`;
 
-export async function open(browser, url, { viewport = { width: 1440, height: 900 }, reducedMotion = "no-preference", init = true } = {}) {
+export const SOLO_INIT = `(() => { try { const k = "${KEY_NEW}device"; let d = null; try { d = JSON.parse(localStorage.getItem(k)); } catch {}
+  if (!d || typeof d !== "object") d = {};
+  if (d.mode !== "solo" && !d.token) { d.mode = "solo"; localStorage.setItem(k, JSON.stringify(d)); } } catch {} })();`;
+
+export async function open(browser, url, { viewport = { width: 1440, height: 900 }, reducedMotion = "no-preference", init = true, solo = true } = {}) {
   const ctx = await browser.newContext({ viewport, reducedMotion });
   if (init) await ctx.addInitScript(INIT);
+  // 2단계 시작 화면 건너뛰기(준비 코드): 새 화면(원본 아님)을 열 때마다, 그룹 로그인도 혼자 쓰기 선택도 없으면 mode:"solo"를 기기 정보에 넣는다.
+  // (store-local 의 getMode/setMode 와 같은 모양: hanjan.v1.device.mode === "solo"). 시험 내용·기준은 그대로.
+  if (!isOrig(url) && solo) await ctx.addInitScript(SOLO_INIT);   // 2단계 시나리오는 solo:false 로 시작 화면부터 본다
   const page = await ctx.newPage();
   page.errors = [];
   page.on("pageerror", e => page.errors.push("pageerror: " + e.message));

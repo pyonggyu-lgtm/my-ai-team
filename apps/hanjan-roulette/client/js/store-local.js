@@ -117,6 +117,10 @@ export function createLocalStore(storage = getBrowserStorage(), opts = {}) {
     return d;
   }
 
+  // device 키에는 store-remote 가 쓰는 token·groupId·memberId 와 mode 도 들어 있다 → 모르는 필드는 지우지 않고 그대로 둔다.
+  const rawDevice = () => { const r = read("device"); return isObj(r) ? r : {}; };
+  const writeDevice = patch => write("device", { ...rawDevice(), ...patch });
+
   function makeBoard(templateId, { name, resultLead, excludeYesterday } = {}, sortOrder) {
     const t = TEMPLATES[templateId] ?? TEMPLATES.empty;
     return {
@@ -165,8 +169,24 @@ export function createLocalStore(storage = getBrowserStorage(), opts = {}) {
         lastBoardId: d.lastBoardId === null || str(d.lastBoardId) ? d.lastBoardId : null,
         nickname: str(d.nickname) ? d.nickname : "",
       };
-      write("device", clean);
+      writeDevice(clean);
       return clean;
+    },
+
+    // ---- 2단계에서 더해진 것: 같은 device 키 안의 mode("solo")와 그룹 로그인 정보 ----
+    // 혼자 쓰기를 골랐는지. 그룹으로 들어가거나 시작 화면으로 돌아가면 null.
+    async getMode() { const m = rawDevice().mode; return m === "solo" ? "solo" : null; },
+    async setMode(mode) {
+      const raw = { ...rawDevice() };
+      if (mode === "solo") raw.mode = "solo"; else delete raw.mode;
+      write("device", raw);
+      return raw.mode ?? null;
+    },
+    // 그룹 로그인이 남아 있는지(토큰 원문은 돌려주지 않는다). store-remote 의 getSession 과 같은 모양.
+    async getSession() {
+      const d = rawDevice();
+      const ok = str(d.token) && d.token && str(d.groupId) && d.groupId;
+      return { signedIn: !!ok, groupId: ok ? d.groupId : null, memberId: ok && str(d.memberId) ? d.memberId : null };
     },
 
     // ---- 메뉴판 ----
@@ -203,7 +223,7 @@ export function createLocalStore(storage = getBrowserStorage(), opts = {}) {
       const sk = loadSkipped(); delete sk[id];
       const dev = loadDevice();
       const ps = [saveBoards(rest), write("history", h), write("skipped", sk)];
-      if (dev.lastBoardId === id) ps.push(write("device", { ...dev, lastBoardId: null }));
+      if (dev.lastBoardId === id) ps.push(writeDevice({ lastBoardId: null }));
       return okr(ps.every(Boolean));
     },
     async reorderBoards(ids) {

@@ -190,10 +190,11 @@ const tabs = p => p.$$eval("#boardTabs .tab", t => t.map(x => x.textContent));
   const geo = () => page.evaluate(() => {
     const r = id => { const b = document.getElementById(id).getBoundingClientRect(); return { x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.width), h: Math.round(b.height), r: Math.round(b.right), b: Math.round(b.bottom) }; };
     const a = document.querySelector("aside").getBoundingClientRect(), f = document.getElementById("boardSettingsBtn");
-    return { snd: r("snd"), reset: r("resetBtn"), foot: r("foot"), set: r("boardSettingsBtn"), aside: { x: Math.round(a.x), r: Math.round(a.right), b: Math.round(a.bottom) }, font: parseFloat(getComputedStyle(f).fontSize), last: document.querySelector("aside").lastElementChild.id, txt: f.textContent };
+    return { snd: r("snd"), reset: r("resetBtn"), foot: r("foot"), set: r("boardSettingsBtn"), aside: { x: Math.round(a.x), r: Math.round(a.right), b: Math.round(a.bottom) }, font: parseFloat(getComputedStyle(f).fontSize), last: document.querySelector("aside").lastElementChild.id, next: document.getElementById("boardSettingsBtn").nextElementSibling?.id, txt: f.textContent };
   });
   const g = await geo();
-  eq(8, "① 문구·위치: 패널 맨 아래, #foot 아래 별도 줄", [g.txt, g.last, g.set.y >= g.foot.b], ["메뉴판 설정", "boardSettingsBtn", true]);
+  // 2단계에서 기준 변경(진록 승인): #groupBtn 이 패널 맨 아래로 들어옴 → 메뉴판 설정 버튼은 #groupBtn 바로 위(사이에 다른 요소 없음), 맨 아래는 #groupBtn
+  eq(8, "① 문구·위치: #foot 아래 별도 줄, #groupBtn 바로 위, #groupBtn이 패널 맨 아래", [g.txt, g.next, g.last, g.set.y >= g.foot.b], ["메뉴판 설정", "groupBtn", "groupBtn", true]);
   rec(8, "① 높이 48px 이상·글씨 18px 이상·패널 너비 가득", g.set.h >= 48 && g.font >= 18 && g.set.x - g.aside.x <= 20 && g.aside.r - g.set.r <= 20, g);
   await shot(page, "S8-설정버튼-PC");
   // ⑧ 원본 두 버튼 폭: 설정 버튼을 숨겼을 때와 같음
@@ -272,8 +273,8 @@ const tabs = p => p.$$eval("#boardTabs .tab", t => t.map(x => x.textContent));
 { // ⑨ 390px
   const boards = [mkBoard("bl", "점심", "오늘 점심은", "lunch", LUNCH8, 0)];
   const { ctx, page } = await fresh({ viewport: { width: 390, height: 844 } }, { boards });
-  const m = await page.evaluate(() => { const b = document.getElementById("boardSettingsBtn").getBoundingClientRect(), a = document.querySelector("aside").getBoundingClientRect(), f = document.getElementById("foot").getBoundingClientRect(), s = document.getElementById("snd").getBoundingClientRect(), r = document.getElementById("resetBtn").getBoundingClientRect(); return { hscroll: document.documentElement.scrollWidth > innerWidth, x: Math.round(b.x), right: Math.round(b.right), vw: innerWidth, h: Math.round(b.height), belowFoot: b.y >= f.bottom, last: document.querySelector("aside").lastElementChild.id, footOverflow: s.right > f.right + 1 || r.right > f.right + 1, asideBelowWheel: a.top >= document.getElementById("wheel").getBoundingClientRect().bottom - 1 }; });
-  rec(8, "⑨ 390px: 가로 스크롤 없음·버튼이 화면 안·패널 맨 아래·#foot 아래", !m.hscroll && m.x >= 0 && m.right <= m.vw && m.h >= 48 && m.belowFoot && m.last === "boardSettingsBtn" && !m.footOverflow && m.asideBelowWheel, m);
+  const m = await page.evaluate(() => { const b = document.getElementById("boardSettingsBtn").getBoundingClientRect(), a = document.querySelector("aside").getBoundingClientRect(), f = document.getElementById("foot").getBoundingClientRect(), s = document.getElementById("snd").getBoundingClientRect(), r = document.getElementById("resetBtn").getBoundingClientRect(); return { hscroll: document.documentElement.scrollWidth > innerWidth, x: Math.round(b.x), right: Math.round(b.right), vw: innerWidth, h: Math.round(b.height), belowFoot: b.y >= f.bottom, last: document.querySelector("aside").lastElementChild.id, next: document.getElementById("boardSettingsBtn").nextElementSibling?.id, footOverflow: s.right > f.right + 1 || r.right > f.right + 1, asideBelowWheel: a.top >= document.getElementById("wheel").getBoundingClientRect().bottom - 1 }; });
+  rec(8, "⑨ 390px: 가로 스크롤 없음·버튼이 화면 안·#groupBtn 바로 위(#groupBtn이 패널 맨 아래)·#foot 아래", !m.hscroll && m.x >= 0 && m.right <= m.vw && m.h >= 48 && m.belowFoot && m.next === "groupBtn" && m.last === "groupBtn" && !m.footOverflow && m.asideBelowWheel, m);
   await page.evaluate(() => document.getElementById("boardSettingsBtn").scrollIntoView({ block: "center" }));
   await shot(page, "S8-설정버튼-폰390");
   await page.click("#boardSettingsBtn"); await page.waitForSelector("#boardDialog[open]"); await page.waitForTimeout(400);

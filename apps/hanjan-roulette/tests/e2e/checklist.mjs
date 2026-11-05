@@ -292,7 +292,12 @@ if (diffs.length) {
 }
 fs.writeFileSync("/workspace/apps/hanjan-roulette/tests/e2e/0단계_점검표.md", md.join("\n") + "\n");
 console.log(main.map(r => `${String(r.i).padStart(2)} ${r.ok ? "같음" : "다름"}  ${r.name}`).join("\n"));
-for (const d of diffs) console.log("DIFF", d.i, d.k, "orig=", short(d.orig, 200), "new=", short(d.new, 200));
+for (const d of diffs) console.log("DIFF", d.i, `[${d.i}번 ${NAMES[d.i]}]`, d.k, "orig=", short(d.orig, 200), "new=", short(d.new, 200));
+// 기록 보강: 통과했지만 허용 오차의 75% 넘게 벌어진 시간 값은 남긴다(흔들림 추적용)
+for (const i of Object.keys(orig)) for (const k of Object.keys(orig[i] || {})) {
+  const a = orig[i][k], b = neu[i]?.[k], tol = a.tol ?? b?.tol;
+  if (b && tol != null && typeof a.v === "number" && typeof b.v === "number" && Math.abs(a.v - b.v) > tol * 0.75 && Math.abs(a.v - b.v) <= tol) console.log("NEAR", i, `[${i}번 ${NAMES[i]}]`, k, "orig=", a.v, "new=", b.v, "허용 ±" + tol);
+}
 console.log(`오류(원본/새) ${short(orig[0]?.["콘솔·페이지 오류"]?.v)} / ${short(neu[0]?.["콘솔·페이지 오류"]?.v)}`);
 console.log(`시험 D: ${main.filter(r => r.ok).length}/23 같음`);
 process.exit(main.every(r => r.ok) ? 0 : 1);

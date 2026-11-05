@@ -69,12 +69,12 @@
       "item": "history[점심판id] 1건(오늘 KST 날짜·메뉴)",
       "ok": true,
       "got": {
-        "de50126e-113e-446e-ace5-4f04ae4fb991": [
+        "a048df7b-57c4-4922-b255-0aaffbb00938": [
           {
             "date": "2026-11-05",
             "name": "샐러드",
             "nickname": "",
-            "confirmedAt": "2026-11-05T08:51:12.626Z"
+            "confirmedAt": "2026-11-05T14:35:13.708Z"
           }
         ]
       }
@@ -511,7 +511,7 @@
       "sc": 6,
       "item": "device.lastBoardId = 술 한잔",
       "ok": true,
-      "got": "9526e807-1952-4ea8-b4e3-ecb9873835e6"
+      "got": "9e3d398e-68c6-4e45-91a5-875b8a05ece8"
     },
     {
       "sc": 6,

@@ -8,6 +8,12 @@
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+<div id="connBar" role="status" hidden>
+  <span class="conn-dot" aria-hidden="true"></span>
+  <span class="conn-main">연결이 끊겼어요. 다시 연결하는 중…</span>
+  <span class="conn-sub">돌리기·확정은 그대로 할 수 있어요</span>
+</div>
+
 <main>
   <div id="boardBar">
     <div id="boardTabs" aria-label="메뉴판"></div>
@@ -34,6 +40,7 @@
     <button id="resetBtn" type="button">처음 메뉴로 되돌리기</button>
   </div>
   <button type="button" id="boardSettingsBtn">메뉴판 설정</button>
+  <button type="button" id="groupBtn"><span class="gb-label">친구와 함께 쓰기</span><span class="gb-name" id="groupBtnName"></span></button>
 </aside>
 
 <div id="toast"></div>
@@ -50,6 +57,54 @@
     <button id="closeBtn">닫기</button>
   </div>
 </div>
+
+<div id="peerToast" role="status" hidden>
+  <span id="peerToastText"></span>
+  <button type="button" id="peerToastClose">확인</button>
+</div>
+
+<section id="startScreen" aria-labelledby="startTitle" hidden>
+  <div class="start-inner">
+    <h1 id="startTitle">한잔메뉴룰렛</h1>
+    <p class="start-lead">오늘 뭐 먹을지, 같이 정해 봐요.</p>
+
+    <div class="mode-row" role="group" aria-label="시작 방법">
+      <button type="button" id="modeCreate" class="mode-btn" aria-pressed="true">그룹 만들기</button>
+      <button type="button" id="modeJoin" class="mode-btn" aria-pressed="false">코드로 참여</button>
+    </div>
+
+    <form id="createForm" class="start-panel" autocomplete="off" novalidate>
+      <div class="field"><label for="createGroupName">그룹 이름</label>
+        <input type="text" id="createGroupName" maxlength="20" aria-describedby="createGroupHint" placeholder="예: 우리 팀 점심">
+        <div class="field-hint" id="createGroupHint">20자까지 쓸 수 있어요.</div></div>
+      <div class="field"><label for="createNick">내 이름(닉네임)</label>
+        <input type="text" id="createNick" maxlength="10" aria-describedby="createNickHint" placeholder="예: 민수">
+        <div class="field-hint" id="createNickHint">10자까지. 다른 사람에게 이 이름으로 보여요.</div></div>
+      <label class="start-check" id="importRow" hidden><input type="checkbox" id="importCheck" checked>
+        <span><b>이 폰의 메뉴판과 기록 가져가기</b><small id="importSummary"></small></span></label>
+      <div class="start-msg" id="createMsg" role="alert"></div>
+      <button type="submit" id="createBtn" class="btn btn-stamp btn-big btn-block">그룹 만들기</button>
+    </form>
+
+    <form id="joinForm" class="start-panel" autocomplete="off" novalidate hidden>
+      <div class="field"><label for="joinCode">초대 코드</label>
+        <input type="text" id="joinCode" maxlength="6" autocapitalize="characters" autocorrect="off" spellcheck="false" aria-describedby="joinCodeHint" placeholder="6글자 코드">
+        <div class="field-hint" id="joinCodeHint">친구가 알려 준 글자 6개를 넣어 주세요.</div></div>
+      <div class="preview-box" id="joinPreview" role="status" hidden><b id="joinGroupName"></b><span id="joinGroupCount"></span></div>
+      <div class="field"><label for="joinNick">내 이름(닉네임)</label>
+        <input type="text" id="joinNick" maxlength="10" aria-describedby="joinNickHint" placeholder="예: 영희">
+        <div class="field-hint" id="joinNickHint">10자까지. 다른 사람에게 이 이름으로 보여요.</div></div>
+      <div class="start-msg" id="joinMsg" role="alert"></div>
+      <button type="submit" id="joinBtn" class="btn btn-stamp btn-big btn-block">참여하기</button>
+    </form>
+
+    <div class="start-solo">
+      <button type="button" id="soloBtn" class="btn btn-ghost btn-big btn-block">혼자 쓰기</button>
+      <p class="start-hint">그룹 없이 이 폰에서만 써요. 나중에 그룹을 만들 수도 있어요.</p>
+      <button type="button" id="startBackBtn" class="btn btn-ghost btn-block" hidden style="margin-top:.8rem">돌아가기</button>
+    </div>
+  </div>
+</section>
 
 <dialog id="boardDialog" class="dlg" aria-labelledby="boardDialogTitle">
   <form id="boardForm" class="dlg-body" autocomplete="off" novalidate>
@@ -113,6 +168,54 @@
     <ul id="historyList" class="h-list" aria-labelledby="historyListTitle"></ul>
     <p id="historyEmpty" class="empty-msg" hidden>아직 기록이 없어요. 돌려서 확정하면 여기에 쌓여요.</p>
     <button type="button" id="historyMore" class="btn btn-sub" hidden>더 보기 (30일 더)</button>
+  </div>
+</dialog>
+
+<dialog id="groupDialog" class="dlg" aria-labelledby="groupDialogTitle">
+  <div class="dlg-head">
+    <h2 id="groupDialogTitle">그룹</h2>
+    <button type="button" id="groupCloseBtn" class="btn btn-sub">닫기</button>
+  </div>
+  <div class="dlg-body">
+    <h3 style="margin-top:0">친구 부르기</h3>
+    <div class="invite-code" id="inviteCode" role="text" aria-label="초대 코드"></div>
+    <div class="invite-btns">
+      <button type="button" id="copyLinkBtn" class="btn btn-main">초대 링크 복사</button>
+      <button type="button" id="copyCodeBtn" class="btn btn-sub">코드만 복사</button>
+    </div>
+    <div id="copyMsg" role="status"></div>
+    <div class="field"><label for="inviteLink">초대 링크</label>
+      <input type="text" id="inviteLink" readonly></div>
+
+    <h3 id="memberTitle">함께하는 사람 <span id="memberCount"></span></h3>
+    <ul id="memberList" class="member-list" aria-labelledby="memberTitle"></ul>
+
+    <h3>그룹 나가기</h3>
+    <button type="button" id="leaveBtn" class="btn btn-danger btn-block">그룹에서 나가기</button>
+  </div>
+</dialog>
+
+<dialog id="leaveDialog" class="dlg" role="alertdialog" aria-labelledby="leaveMsgTitle" aria-describedby="leaveSub">
+  <div class="dlg-body">
+    <p class="dlg-msg" id="leaveMsgTitle">이 그룹에서 나갈까요?</p>
+    <p class="dlg-sub" id="leaveSub">나가면 이 폰에서는 그룹을 볼 수 없어요. 다시 들어오려면 초대 코드가 필요해요.</p>
+    <div id="leaveMsg" role="alert"></div>
+    <div class="dlg-actions">
+      <button type="button" id="leaveNoBtn" class="btn btn-sub" autofocus>그대로 있기</button>
+      <button type="button" id="leaveYesBtn" class="btn btn-danger">나가기</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="overwriteDialog" class="dlg" role="alertdialog" aria-labelledby="overwriteMsg" aria-describedby="overwriteSub">
+  <div class="dlg-body">
+    <p class="dlg-sub" id="overwriteDay" hidden>어제 날짜의 확정이에요.</p>
+    <p class="dlg-msg" id="overwriteMsg"><b id="overwriteWho"></b>님이 <b id="overwriteMenu"></b><span id="overwriteRo">로</span> 확정했어요. 바꿀까요?</p>
+    <p class="dlg-sub" id="overwriteSub">내가 고른 메뉴: <b id="overwriteMine"></b></p>
+    <div class="dlg-actions">
+      <button type="button" id="overwriteNoBtn" class="btn btn-sub" autofocus>그대로 두기</button>
+      <button type="button" id="overwriteYesBtn" class="btn btn-main">바꾸기</button>
+    </div>
   </div>
 </dialog>
 

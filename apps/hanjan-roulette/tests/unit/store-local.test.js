@@ -338,6 +338,57 @@ test("device: 기본값·부분 갱신·잘못된 값 보정", async () => {
   await store.setDevice({ sound: "yes", nickname: 5 });
   assert.deepEqual(await store.getDevice(), { sound: false, lastBoardId: "b1", nickname: "" });
 });
+test("[2단계] device 키의 token·groupId·memberId·mode 는 setDevice·메뉴판 삭제 때 지워지지 않는다", async () => {
+  const dev = { sound: true, token: "T", groupId: "g1", memberId: "m1", mode: "solo", 모르는: 1 };
+  const { store, storage } = make({ "hanjan.v1.device": JSON.stringify(dev) });
+  await store.setDevice({ lastBoardId: "b1", sound: false });
+  let raw = JSON.parse(storage.getItem("hanjan.v1.device"));
+  assert.deepEqual([raw.token, raw.groupId, raw.memberId, raw.mode, raw.모르는], ["T", "g1", "m1", "solo", 1]);
+  assert.deepEqual([raw.sound, raw.lastBoardId], [false, "b1"]);
+  assert.deepEqual(await store.getDevice(), { sound: false, lastBoardId: "b1", nickname: "" }); // 화면 쪽 모양은 그대로(토큰을 내놓지 않음)
+  // 마지막으로 보던 메뉴판을 지워도 남는다
+  const st = await store.getState();
+  const second = (await store.createBoard({ name: "둘째" })).board;
+  await store.setDevice({ lastBoardId: second.id });
+  await store.deleteBoard(second.id);
+  raw = JSON.parse(storage.getItem("hanjan.v1.device"));
+  assert.equal(raw.lastBoardId, null);
+  assert.deepEqual([raw.token, raw.groupId, raw.memberId, raw.mode], ["T", "g1", "m1", "solo"]);
+  void st;
+  // 깨진 값이어도 setDevice 는 동작
+  const b = make({ "hanjan.v1.device": "7" });
+  await b.store.setDevice({ sound: true });
+  assert.equal(JSON.parse(b.storage.getItem("hanjan.v1.device")).sound, true);
+});
+
+test("[2단계] getMode/setMode: solo 만 기억하고 다른 값이면 지움(다른 필드는 그대로)", async () => {
+  const { store, storage } = make({ "hanjan.v1.device": JSON.stringify({ token: "T", groupId: "g1", sound: true }) });
+  assert.equal(await store.getMode(), null);
+  assert.equal(await store.setMode("solo"), "solo");
+  assert.equal(await store.getMode(), "solo");
+  let raw = JSON.parse(storage.getItem("hanjan.v1.device"));
+  assert.deepEqual([raw.mode, raw.token, raw.sound], ["solo", "T", true]);
+  assert.equal(await store.setMode(null), null);
+  raw = JSON.parse(storage.getItem("hanjan.v1.device"));
+  assert.equal("mode" in raw, false);
+  assert.equal(raw.token, "T");
+  await store.setMode("group");
+  assert.equal(await store.getMode(), null);
+  const b = make({ "hanjan.v1.device": JSON.stringify({ mode: "엉뚱" }) });
+  assert.equal(await b.store.getMode(), null);
+});
+
+test("[2단계] getSession: 토큰과 그룹이 둘 다 있을 때만 로그인, 토큰 원문은 돌려주지 않는다", async () => {
+  const none = make();
+  assert.deepEqual(await none.store.getSession(), { signedIn: false, groupId: null, memberId: null });
+  const half = make({ "hanjan.v1.device": JSON.stringify({ token: "T" }) });
+  assert.equal((await half.store.getSession()).signedIn, false);
+  const ok = make({ "hanjan.v1.device": JSON.stringify({ token: "T", groupId: "g1", memberId: "m1" }) });
+  const s = await ok.store.getSession();
+  assert.deepEqual(s, { signedIn: true, groupId: "g1", memberId: "m1" });
+  assert.ok(!JSON.stringify(s).includes("T\""));
+});
+
 test("없는 메뉴판 id는 NOT_FOUND", async () => {
   const { store } = make();
   for (const r of [await store.addItem("x", "a"), await store.confirm("x", "a"), await store.addSkip("x", "a"),

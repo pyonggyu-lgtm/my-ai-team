@@ -1,0 +1,21 @@
+{
+  "note": "토큰·id 없음. 시나리오 8의 GET /history·/stats 응답(A 토큰)",
+  "history": {
+    "entries": [
+      {
+        "date": "2026-11-05",
+        "name": "라면집",
+        "nickname": "에이",
+        "confirmedAt": "2026-11-05T14:36:32.005Z"
+      }
+    ],
+    "hasMore": false,
+    "oldest": "2026-11-05"
+  },
+  "stats": [
+    {
+      "name": "라면집",
+      "count": 1
+    }
+  ]
+}

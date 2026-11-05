@@ -473,9 +473,9 @@
       "item": "390px: 기록 창이 화면 가로 가득·아래에 붙음·가로 스크롤 없음",
       "ok": true,
       "got": {
-        "left": 0.000823974609375,
-        "right": 389.9991760253906,
-        "bottom": 844.0008850097656,
+        "left": 0.000091552734375,
+        "right": 389.9999084472656,
+        "bottom": 844.0001220703125,
         "vw": 390,
         "vh": 844,
         "hscroll": false,
@@ -496,11 +496,12 @@
     },
     {
       "sc": 8,
-      "item": "① 문구·위치: 패널 맨 아래, #foot 아래 별도 줄",
+      "item": "① 문구·위치: #foot 아래 별도 줄, #groupBtn 바로 위, #groupBtn이 패널 맨 아래",
       "ok": true,
       "got": [
         "메뉴판 설정",
-        "boardSettingsBtn",
+        "groupBtn",
+        "groupBtn",
         true
       ]
     },
@@ -511,35 +512,35 @@
       "got": {
         "snd": {
           "x": 1153,
-          "y": 790,
+          "y": 726,
           "w": 73,
           "h": 37,
           "r": 1226,
-          "b": 826
+          "b": 762
         },
         "reset": {
           "x": 1234,
-          "y": 790,
+          "y": 726,
           "w": 190,
           "h": 37,
           "r": 1424,
-          "b": 826
+          "b": 762
         },
         "foot": {
           "x": 1153,
-          "y": 790,
+          "y": 726,
           "w": 271,
           "h": 37,
           "r": 1424,
-          "b": 826
+          "b": 762
         },
         "set": {
           "x": 1153,
-          "y": 834,
+          "y": 770,
           "w": 271,
           "h": 48,
           "r": 1424,
-          "b": 882
+          "b": 818
         },
         "aside": {
           "x": 1136,
@@ -547,7 +548,8 @@
           "b": 900
         },
         "font": 18,
-        "last": "boardSettingsBtn",
+        "last": "groupBtn",
+        "next": "groupBtn",
         "txt": "메뉴판 설정"
       }
     },
@@ -720,7 +722,7 @@
     },
     {
       "sc": 8,
-      "item": "⑨ 390px: 가로 스크롤 없음·버튼이 화면 안·패널 맨 아래·#foot 아래",
+      "item": "⑨ 390px: 가로 스크롤 없음·버튼이 화면 안·#groupBtn 바로 위(#groupBtn이 패널 맨 아래)·#foot 아래",
       "ok": true,
       "got": {
         "hscroll": false,
@@ -729,7 +731,8 @@
         "vw": 390,
         "h": 48,
         "belowFoot": true,
-        "last": "boardSettingsBtn",
+        "last": "groupBtn",
+        "next": "groupBtn",
         "footOverflow": false,
         "asideBelowWheel": true
       }
