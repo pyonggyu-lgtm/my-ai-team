@@ -101,8 +101,11 @@ export async function createServer({ dbPath = ":memory:", now = () => new Date()
 
 // 파일을 직접 실행했을 때만: 개발 서버
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const s = await createServer({ dbPath: join(APP_ROOT, "data", "hanjan.db"), staticDir: join(APP_ROOT, "client"), log: console.log });
+  // 환경 변수(배포: .env → PM2 node_args --env-file). 없으면 개발 기본값 그대로.
+  //   PORT(기본 3000), HOST(기본 127.0.0.1, listen 에서 읽음), DB_PATH(기본 data/hanjan.db)
+  // 배포에서도 client/ 를 같이 준다(127.0.0.1 바인딩이라 외부 노출 없음, 정적 파일은 Nginx 가 먼저 처리).
+  const s = await createServer({ dbPath: process.env.DB_PATH || join(APP_ROOT, "data", "hanjan.db"), staticDir: join(APP_ROOT, "client"), log: console.log });
   const port = await s.listen(Number(process.env.PORT) || 3000);
-  console.log(`한잔메뉴룰렛 개발 서버: http://localhost:${port}`);
+  console.log(`한잔메뉴룰렛 서버: http://${process.env.HOST || "127.0.0.1"}:${port}`);
   for (const sig of ["SIGINT", "SIGTERM"]) process.on(sig, () => s.close().then(() => process.exit(0)));
 }
